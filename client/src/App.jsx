@@ -10,7 +10,7 @@ function App() {
       <header className="app-header">
         <div className="brand">
           <Tv size={28} />
-          <span>WatchSync</span>
+          <span>twoStream</span>
         </div>
         <div className="nav-links">
           <a href="/" className="btn btn-secondary">New Room</a>
