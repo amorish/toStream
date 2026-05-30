@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
+import ReactPlayer from 'react-player';
 import VideoPlayer from './VideoPlayer';
 import { Mic, MicOff, Link, Check, AlertCircle } from 'lucide-react';
 
@@ -9,7 +10,7 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (window.location.origin.in
 
 const isDirectVideo = (url) => {
   if (!url) return false;
-  return url.match(/\.(mp4|webm|ogg|m3u8)($|\?)/i) !== null;
+  return ReactPlayer.canPlay(url);
 };
 
 const Room = () => {
@@ -250,7 +251,7 @@ const Room = () => {
             <input 
               type="text" 
               className="input-field" 
-              placeholder="Paste video URL or Website Link (e.g. https://cxfoot...)" 
+              placeholder="Paste YouTube, Twitch, video URL, or Website Link" 
               value={inputUrl}
               onChange={e => setInputUrl(e.target.value)}
             />
@@ -263,11 +264,11 @@ const Room = () => {
         {videoUrl && isDirectVideo(videoUrl) ? (
           <VideoPlayer url={videoUrl} socket={socket} roomId={roomId} />
         ) : videoUrl ? (
-          <div className="video-container animate-fade-in">
+          <div className="video-container animate-fade-in" style={{ paddingTop: '56.25%', position: 'relative' }}>
             <iframe 
               src={videoUrl} 
               className="video-element" 
-              style={{ border: 'none', background: 'white' }} 
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: 'white' }} 
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media"
               sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-presentation"

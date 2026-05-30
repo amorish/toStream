@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
+import ReactPlayer from 'react-player';
 
 const VideoPlayer = ({ url, socket, roomId }) => {
-  const videoRef = useRef(null);
-  const [isReady, setIsReady] = useState(false);
+  const playerRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   
   // To prevent echo loops: track if the current change was triggered by a remote socket event
   const remoteActionRef = useRef(false);
@@ -11,23 +12,23 @@ const VideoPlayer = ({ url, socket, roomId }) => {
     if (!socket || !url) return;
 
     const handleVideoAction = ({ action, payload, from }) => {
-      if (!videoRef.current) return;
+      if (!playerRef.current) return;
       
       remoteActionRef.current = true;
       
       switch (action) {
         case 'play':
-          if (Math.abs(videoRef.current.currentTime - payload) > 1) {
-            videoRef.current.currentTime = payload;
+          if (Math.abs(playerRef.current.getCurrentTime() - payload) > 1) {
+            playerRef.current.seekTo(payload, 'seconds');
           }
-          videoRef.current.play().catch(e => console.error("Play failed", e));
+          setIsPlaying(true);
           break;
         case 'pause':
-          videoRef.current.currentTime = payload;
-          videoRef.current.pause();
+          playerRef.current.seekTo(payload, 'seconds');
+          setIsPlaying(false);
           break;
         case 'seek':
-          videoRef.current.currentTime = payload;
+          playerRef.current.seekTo(payload, 'seconds');
           break;
       }
       
@@ -46,7 +47,7 @@ const VideoPlayer = ({ url, socket, roomId }) => {
 
   const emitAction = (action, payload) => {
     if (remoteActionRef.current) return; // Don't echo back what we just received
-    if (!socket) return;
+    if (!socket || !playerRef.current) return;
     
     socket.emit('video-action', {
       roomId,
@@ -56,40 +57,45 @@ const VideoPlayer = ({ url, socket, roomId }) => {
   };
 
   const handlePlay = () => {
-    if (!videoRef.current) return;
-    emitAction('play', videoRef.current.currentTime);
+    setIsPlaying(true);
+    if (!playerRef.current) return;
+    emitAction('play', playerRef.current.getCurrentTime());
   };
 
   const handlePause = () => {
-    if (!videoRef.current) return;
-    emitAction('pause', videoRef.current.currentTime);
+    setIsPlaying(false);
+    if (!playerRef.current) return;
+    emitAction('pause', playerRef.current.getCurrentTime());
   };
 
-  const handleSeek = () => {
-    if (!videoRef.current) return;
-    emitAction('seek', videoRef.current.currentTime);
+  const handleSeek = (e) => {
+    // e is the time in seconds
+    emitAction('seek', e);
   };
 
   if (!url) {
     return (
       <div className="video-container" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <h3>No video selected</h3>
-        <p>The host needs to provide a video URL to start watching.</p>
+        <h3>No stream selected</h3>
+        <p>Paste a YouTube link, Twitch link, or direct video URL above to start watching.</p>
       </div>
     );
   }
 
   return (
-    <div className="video-container animate-fade-in">
-      <video
-        ref={videoRef}
-        src={url}
+    <div className="video-container animate-fade-in" style={{ paddingTop: '56.25%', position: 'relative' }}>
+      <ReactPlayer
+        ref={playerRef}
+        url={url}
         className="video-element"
+        style={{ position: 'absolute', top: 0, left: 0 }}
+        width="100%"
+        height="100%"
         controls
+        playing={isPlaying}
         onPlay={handlePlay}
         onPause={handlePause}
-        onSeeked={handleSeek}
-        onCanPlay={() => setIsReady(true)}
+        onSeek={handleSeek}
       />
     </div>
   );
