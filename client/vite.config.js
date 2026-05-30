@@ -15,4 +15,12 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'COMMONJS_VARIABLE_IN_ESM') return;
+        warn(warning);
+      }
+    }
+  }
 })
