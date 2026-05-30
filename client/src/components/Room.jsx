@@ -270,6 +270,7 @@ const Room = () => {
               style={{ border: 'none', background: 'white' }} 
               allowFullScreen
               allow="autoplay; fullscreen; encrypted-media"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-presentation"
             />
           </div>
         ) : (
