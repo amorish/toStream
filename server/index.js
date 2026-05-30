@@ -23,6 +23,56 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 // Rooms store: roomId -> { code, host, users, videoState }
 const rooms = new Map();
 
+// Proxy endpoint to bypass iframe restrictions (X-Frame-Options, etc.)
+app.get('/proxy', async (req, res) => {
+  const targetUrl = req.query.url;
+  if (!targetUrl) return res.status(400).send('URL is required');
+  
+  try {
+    const fetch = (await import('node-fetch')).default || globalThis.fetch;
+    const response = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('text/html')) {
+      // If it's not HTML, just redirect to the original URL or pipe it
+      return res.redirect(targetUrl);
+    }
+
+    let html = await response.text();
+    
+    // Inject <base> tag to fix relative URLs
+    try {
+      const origin = new URL(targetUrl).origin;
+      html = html.replace('<head>', `<head><base href="${origin}/">`);
+    } catch(e) {}
+
+    // Special bypass for cxfoot and similar sites that check domain and redirect to telegram
+    html = html.replace(
+      /<script\s+src=["'][^"']*configurecxf\.js["']><\/script>/gi, 
+      '<script>window.DOMAIN_CONFIG = { allowedDomains: [window.location.hostname, "cxfoot.pages.dev"] }; window.TELEGRAM_CONFIG = { popupChannel: "" };</script>'
+    );
+
+    // Copy safe headers
+    response.headers.forEach((value, key) => {
+      const lowerKey = key.toLowerCase();
+      if (!['x-frame-options', 'content-security-policy', 'content-security-policy-report-only', 'transfer-encoding', 'content-encoding', 'content-length'].includes(lowerKey)) {
+        res.setHeader(key, value);
+      }
+    });
+
+    res.send(html);
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).send('Error proxying URL');
+  }
+});
+
 app.get('/health', (req, res) => {
   res.send('Server is running');
 });

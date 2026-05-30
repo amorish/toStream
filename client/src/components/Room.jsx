@@ -266,7 +266,7 @@ const Room = () => {
         ) : videoUrl ? (
           <div className="video-container animate-fade-in" style={{ paddingTop: '56.25%', position: 'relative' }}>
             <iframe 
-              src={videoUrl} 
+              src={`${SOCKET_URL}/proxy?url=${encodeURIComponent(videoUrl)}`} 
               className="video-element" 
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', background: 'white' }} 
               allowFullScreen
