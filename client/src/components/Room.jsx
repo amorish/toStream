@@ -213,8 +213,8 @@ const Room = () => {
 
   if (!hasJoined && !isCreating) {
     return (
-      <div className="create-room-card glass-panel animate-fade-in">
-        <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Join Room</h2>
+      <div className="create-room-card glass-panel animate-fade-in" style={{ margin: '4rem auto 0' }}>
+        <h2 className="display-font" style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Join Room</h2>
         {error && <div className="error-message"><AlertCircle size={16} style={{display:'inline', marginRight: '8px'}}/>{error}</div>}
         <div className="form-group">
           <label>Secret Code required</label>
@@ -276,7 +276,7 @@ const Room = () => {
           </div>
         ) : (
           <div className="video-container" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <h3>No stream selected</h3>
+            <h3 className="display-font">No stream selected</h3>
             <p>Paste a video URL or a Website link above to start watching.</p>
           </div>
         )}
@@ -284,7 +284,7 @@ const Room = () => {
 
       <div className="sidebar glass-panel">
         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
-          <h3 style={{ marginBottom: '1rem' }}>Room Details</h3>
+          <h3 className="display-font" style={{ marginBottom: '1rem' }}>Room Details</h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Invite Link (includes secret code):</p>
           <button onClick={copyInvite} className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
             {copied ? <Check size={18} color="#10b981" /> : <Link size={18} />}
@@ -293,7 +293,7 @@ const Room = () => {
         </div>
 
         <div className="participants-panel">
-          <h3 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 className="display-font" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             Participants
             <span style={{ fontSize: '0.8rem', background: 'var(--primary)', padding: '2px 8px', borderRadius: '12px' }}>
               {participants.length}

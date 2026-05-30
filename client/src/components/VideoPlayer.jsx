@@ -76,7 +76,7 @@ const VideoPlayer = ({ url, socket, roomId }) => {
   if (!url) {
     return (
       <div className="video-container" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <h3>No stream selected</h3>
+        <h3 className="display-font">No stream selected</h3>
         <p>Paste a YouTube link, Twitch link, or direct video URL above to start watching.</p>
       </div>
     );
