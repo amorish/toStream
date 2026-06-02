@@ -7,6 +7,25 @@ let musicMixer;
 let currentMode = 'camera';
 let isCreator = false;
 
+window.sounds = {
+  join: new Audio('/audio/joined.wav'),
+  rejoin: new Audio('/audio/cameback.wav'),
+  back: new Audio('/audio/back.mp3'),
+  callcut: new Audio('/audio/callcut.wav'),
+  micon: new Audio('/audio/micon.mp3'),
+  tap: new Audio('/audio/tap.mp3')
+};
+
+window.playSound = function(name) {
+  if (window.sounds[name]) {
+    window.sounds[name].currentTime = 0;
+    window.sounds[name].play().catch(e => console.warn('Audio play failed:', e));
+  }
+};
+
+let seenUsers = new Set();
+let myJoinCount = 0;
+
 document.addEventListener('DOMContentLoaded', async () => {
   const user = getUser();
   document.getElementById('local-label').textContent = user.username + ' (You)';
@@ -64,6 +83,10 @@ function setupSocketListeners() {
   });
 
   socket.on('room-joined', (data) => {
+    myJoinCount++;
+    if (myJoinCount > 1) window.playSound('rejoin');
+    else window.playSound('join');
+    
     currentMode = data.mode;
     updateUIForMode(currentMode);
     if (data.videoUrl && data.videoUrl !== '') {
@@ -73,11 +96,18 @@ function setupSocketListeners() {
   });
 
   socket.on('room-error', (data) => {
+    window.playSound('callcut');
     showToast(data.message, 'error');
     setTimeout(() => window.location.href = '/dashboard.html', 2000);
   });
 
   socket.on('user-joined', (data) => {
+    if (seenUsers.has(data.username)) window.playSound('rejoin');
+    else {
+      seenUsers.add(data.username);
+      window.playSound('join');
+    }
+    
     document.getElementById('remote-label').textContent = data.username;
     showToast(`${data.username} joined`, 'success');
   });
@@ -145,7 +175,16 @@ function setupUIListeners() {
     });
   }
 
+  const backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      window.playSound('back');
+      setTimeout(() => window.location.href = '/dashboard.html', 200);
+    });
+  }
+
   document.getElementById('leave-room-btn').addEventListener('click', async () => {
+    window.playSound('callcut');
     if (isCreator) {
       try {
         await apiFetch(`/api/rooms/${roomId}`, { method: 'DELETE' });
@@ -153,12 +192,13 @@ function setupUIListeners() {
     } else {
       socket.emit('leave-room', { roomId });
     }
-    window.location.href = '/dashboard.html';
+    setTimeout(() => window.location.href = '/dashboard.html', 300);
   });
 
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', () => {
+      window.playSound('tap');
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {
           showToast('Fullscreen not supported', 'warning');
@@ -173,6 +213,9 @@ function setupUIListeners() {
 
   document.getElementById('toggle-mic').addEventListener('click', (e) => {
     const isMuted = webrtc.toggleMute();
+    if (!isMuted) window.playSound('micon');
+    else window.playSound('tap');
+    
     const btn = e.currentTarget;
     if (isMuted) {
       btn.classList.remove('neo-button', 'hover:text-primary');
@@ -192,6 +235,9 @@ function setupUIListeners() {
     
     const isOff = await webrtc.toggleCamera();
     btn.style.opacity = '1';
+    
+    if (!isOff) window.playSound('micon');
+    else window.playSound('tap');
     
     if (isOff) {
       btn.classList.remove('neo-button', 'hover:text-primary');
@@ -213,6 +259,7 @@ function setupUIListeners() {
   };
 
   document.getElementById('share-screen').addEventListener('click', async (e) => {
+    window.playSound('tap');
     const btn = e.currentTarget;
     const isSharing = btn.classList.contains('neo-pressed');
     
@@ -234,6 +281,7 @@ function setupUIListeners() {
 
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      window.playSound('tap');
       const mode = btn.dataset.mode;
       socket.emit('mode-change', { roomId, mode });
       currentMode = mode;
@@ -242,6 +290,7 @@ function setupUIListeners() {
   });
 
   document.getElementById('load-video-btn').addEventListener('click', () => {
+    window.playSound('tap');
     const url = document.getElementById('video-url-input').value;
     if (url) videoSync.changeVideo(url);
   });

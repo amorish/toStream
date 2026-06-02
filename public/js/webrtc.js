@@ -28,6 +28,19 @@ class WebRTCManager {
 
     this.peerConnection.ontrack = (event) => {
       this.remoteStream = event.streams[0];
+      
+      this.remoteStream.getTracks().forEach(track => {
+        track.onunmute = () => {
+          if (window.playSound) window.playSound('micon');
+        };
+      });
+
+      this.remoteStream.onaddtrack = (e) => {
+        e.track.onunmute = () => {
+          if (window.playSound) window.playSound('micon');
+        };
+      };
+
       if (this.onRemoteStream) this.onRemoteStream(this.remoteStream);
     };
 
