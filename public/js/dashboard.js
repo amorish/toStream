@@ -44,6 +44,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await loadHistory();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const joinParam = urlParams.get('join');
+  if (joinParam) {
+    // Remove it from the URL so it doesn't trigger again on refresh
+    window.history.replaceState({}, document.title, '/dashboard.html');
+    await attemptJoin(joinParam);
+  }
 });
 
 async function loadHistory() {

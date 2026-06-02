@@ -98,7 +98,7 @@ router.post('/join', joinRoomRules, validate, async (req, res) => {
 
     if (room.roomPassword) {
       if (!password) {
-        return res.status(401).json({ success: false, message: 'This room requires a password.' });
+        return res.status(403).json({ success: false, message: 'This room requires a password.' });
       }
       const isMatch = await bcrypt.compare(password, room.roomPassword);
       if (!isMatch) {

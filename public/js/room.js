@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           else leaveBtn.textContent = 'End';
         }
       }
+    } else if (data && !data.success) {
+      if (data.message === 'You are not a participant in this room.' || data.message === 'Room not found.') {
+        window.location.href = `/dashboard.html?join=${roomId}`;
+        return;
+      }
     }
   } catch (err) {}
 
