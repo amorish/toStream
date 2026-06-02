@@ -122,21 +122,49 @@ function setupUIListeners() {
 
   document.getElementById('toggle-mic').addEventListener('click', (e) => {
     const isMuted = webrtc.toggleMute();
-    e.target.style.opacity = isMuted ? '0.5' : '1';
+    const btn = e.currentTarget;
+    if (isMuted) {
+      btn.classList.remove('neo-button', 'hover:text-primary');
+      btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
+      btn.querySelector('span').textContent = 'mic_off';
+    } else {
+      btn.classList.add('neo-button', 'hover:text-primary');
+      btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
+      btn.querySelector('span').textContent = 'mic';
+    }
   });
 
   document.getElementById('toggle-cam').addEventListener('click', (e) => {
     const isOff = webrtc.toggleCamera();
-    e.target.style.opacity = isOff ? '0.5' : '1';
+    const btn = e.currentTarget;
+    if (isOff) {
+      btn.classList.remove('neo-button', 'hover:text-primary');
+      btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
+      btn.querySelector('span').textContent = 'videocam_off';
+    } else {
+      btn.classList.add('neo-button', 'hover:text-primary');
+      btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
+      btn.querySelector('span').textContent = 'videocam';
+    }
   });
 
   document.getElementById('share-screen').addEventListener('click', async (e) => {
-    try {
-      await webrtc.startScreenShare();
-      e.target.style.background = '#9b5de5'; // highlight
-    } catch (err) {
-      if (err.message !== 'SCREEN_SHARE_DENIED') {
-        showToast('Screen share failed', 'error');
+    const btn = e.currentTarget;
+    const isSharing = btn.classList.contains('neo-pressed');
+    
+    if (isSharing) {
+      await webrtc.stopScreenShare();
+      btn.classList.add('neo-button', 'hover:text-primary');
+      btn.classList.remove('neo-pressed', 'text-success', 'hover:text-green-400');
+      btn.querySelector('span').textContent = 'screen_share';
+    } else {
+      try {
+        await webrtc.startScreenShare();
+        btn.classList.remove('neo-button', 'hover:text-primary');
+        btn.classList.add('neo-pressed', 'text-success', 'hover:text-green-400');
+        btn.querySelector('span').textContent = 'stop_screen_share';
+      } catch (err) {
+        if (err.message !== 'SCREEN_SHARE_DENIED') showToast('Screen share failed', 'error');
       }
     }
   });
