@@ -40,6 +40,9 @@ app.use('/api/rooms', roomsRoutes);
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Ping endpoint to keep Render free instance awake during long streams
+app.get('/api/ping', (req, res) => res.status(200).send('pong'));
+
 // Catch-all route for 404
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));

@@ -75,6 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   connectSocket();
   setupSocketListeners();
   setupUIListeners();
+
+  // Ping the server every 5 minutes to keep Render free instance awake
+  setInterval(() => {
+    fetch('/api/ping').catch(() => {});
+  }, 5 * 60 * 1000);
 });
 
 function setupSocketListeners() {
