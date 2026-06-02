@@ -1,0 +1,9 @@
+{
+  "name": "toStream",
+  "short_name": "toStream",
+  "description": "Private P2P Streaming for Two",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0c29",
+  "theme_color": "#9b5de5"
+}

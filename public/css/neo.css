@@ -1,0 +1,83 @@
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+/* Silk Neomorphic Dark Mode Styles */
+.neo-extruded { 
+    background: #131313; 
+    box-shadow: 8px 8px 16px #080808, -4px -4px 12px rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.03); 
+    transition: all 0.3s ease;
+}
+.neo-pressed { 
+    background: #131313; 
+    box-shadow: inset 4px 4px 8px #080808, inset -2px -2px 6px rgba(255, 255, 255, 0.03); 
+    border: 1px solid rgba(255, 255, 255, 0.01); 
+    transition: all 0.3s ease;
+}
+.neo-button { 
+    background: #131313; 
+    box-shadow: 4px 4px 10px #080808, -2px -2px 8px rgba(255, 255, 255, 0.04); 
+    transition: all 0.2s ease; 
+}
+.neo-button:active { 
+    box-shadow: inset 2px 2px 5px #080808, inset -1px -1px 4px rgba(255, 255, 255, 0.02); 
+    transform: scale(0.98); 
+}
+.neo-button-primary { 
+    background: #6366f1; 
+    box-shadow: 4px 4px 12px #0a0a0a, -2px -2px 8px rgba(99, 102, 241, 0.3); 
+    color: white; 
+    transition: all 0.2s ease; 
+}
+.neo-button-primary:hover { 
+    background: #4f46e5; 
+    box-shadow: 4px 4px 14px #080808, -2px -2px 10px rgba(99, 102, 241, 0.4); 
+}
+.neo-button-primary:active { 
+    box-shadow: inset 2px 2px 5px #3730a3; 
+}
+.text-gradient { 
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%); 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+}
+
+body { background-color: #131313; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* Custom forms to override Tailwind Forms plugin making inputs white */
+[type='text'], [type='email'], [type='password'], select { 
+    background-color: #131313 !important; 
+    border: 1px solid rgba(255,255,255,0.05) !important; 
+    color: #f0f2f8 !important; 
+}
+[type='text']:focus, [type='email']:focus, [type='password']:focus, select:focus { 
+    --tw-ring-color: #6366f1 !important; 
+    border-color: #6366f1 !important; 
+}
+
+/* Fix Autofill styling so it doesn't turn white */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #131313 inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Modals */
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); 
+    z-index: 1000; justify-content: center; align-items: center; 
+}
+
+/* Toasts */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { padding: 15px 20px; border-radius: 8px; color: white; font-weight: 500; background: #242426; border-left: 4px solid #6366f1; animation: slideIn 0.3s ease forwards; max-width: 300px; }
+.toast-error { border-left-color: #ef4444; }
+.toast-success { border-left-color: #00e676; }
+.toast-hide { animation: slideOut 0.4s ease forwards; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }

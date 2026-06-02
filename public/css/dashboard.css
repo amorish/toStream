@@ -1,0 +1,80 @@
+.dashboard-container {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rooms-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.room-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transition);
+}
+
+.room-card:hover {
+  border-color: var(--secondary-color);
+  box-shadow: 0 5px 15px rgba(0, 242, 254, 0.1);
+}
+
+.room-card.expired {
+  opacity: 0.6;
+}
+
+.room-card.expired:hover {
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.room-info h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.room-id {
+  display: block;
+  font-family: monospace;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.room-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.room-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-expired {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}

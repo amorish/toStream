@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Room - toStream</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "on-surface-variant": "#a1a3b1",
+                    "on-surface": "#f0f2f8",
+                    "surface-container-highest": "#242426",
+                    "primary-container": "#4f46e5",
+                    "on-primary-fixed-variant": "#c7d2fe",
+                    "on-error-container": "#f87171",
+                    "secondary-fixed": "#2a2b2f",
+                    "outline-variant": "#3f4046",
+                    "surface-container-low": "#1a1a1c",
+                    "on-tertiary-container": "#ddd6fe",
+                    "on-background": "#f0f2f8",
+                    "background": "#131313",
+                    "on-secondary-fixed-variant": "#d1d5db",
+                    "error": "#ef4444",
+                    "surface": "#131313",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed": "#e0e7ff",
+                    "secondary-container": "#2a2b2f",
+                    "error-container": "#450a0a",
+                    "tertiary-container": "#5b21b6",
+                    "surface-container-high": "#2c2c2e",
+                    "inverse-on-surface": "#131313",
+                    "inverse-surface": "#f0f2f8",
+                    "surface-variant": "#25262b",
+                    "tertiary": "#a78bfa",
+                    "secondary-fixed-dim": "#4b4d5a",
+                    "on-tertiary-fixed-variant": "#c4b5fd",
+                    "inverse-primary": "#6366f1",
+                    "surface-dim": "#0e0e0f",
+                    "surface-bright": "#1e1e20",
+                    "tertiary-fixed-dim": "#7c3aed",
+                    "primary-fixed-dim": "#4f46e5",
+                    "surface-tint": "#6366f1",
+                    "surface-container": "#202022",
+                    "outline": "#585a68",
+                    "on-tertiary-fixed": "#f5f3ff",
+                    "on-primary-container": "#e0e2ff",
+                    "on-secondary-fixed": "#f9fafb",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#ede9fe",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#0a0a0a",
+                    "secondary": "#9ca3af",
+                    "primary": "#6366f1",
+                    "primary-fixed": "#e0e2ff",
+                    "on-secondary-container": "#d1d5db",
+                    "success": "#00e676"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+                },
+                "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+                }
+            }
+        }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/neo.css">
+  <style>
+    /* Room specific styles */
+    .room-body { overflow: hidden; height: 100vh; }
+    .room-container { display: flex; flex-direction: column; height: 100vh; }
+    .room-header { height: 72px; }
+    .room-main { flex: 1; position: relative; overflow: hidden; }
+    .view-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; }
+    .room-footer { height: 80px; }
+    
+    .pip-mode .video-grid { position: absolute; bottom: 20px; right: 20px; width: 300px; height: auto; flex-direction: column; z-index: 10; padding: 0; gap: 16px;}
+    .pip-mode .video-wrapper { height: 168px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    @media (max-width: 768px) { .pip-mode .video-grid { width: 150px; } .pip-mode .video-wrapper { height: 84px; } }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased room-body">
+
+  <div class="room-container">
+    
+    <!-- Top Bar -->
+    <header class="room-header border-b border-white/5 bg-background/80 backdrop-blur-xl flex justify-between items-center px-6">
+      <div class="flex items-center gap-4">
+        <button onclick="window.location.href='/dashboard.html'" class="neo-button rounded-xl px-4 py-2 text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 font-bold text-sm">
+          <span class="material-symbols-outlined text-lg">arrow_back</span>
+          <span class="hidden md:inline">Dashboard</span>
+        </button>
+        <div class="h-6 w-px bg-white/10 mx-2"></div>
+        <h2 id="room-title" class="font-bold text-lg truncate max-w-[200px] md:max-w-md">Loading...</h2>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <div class="neo-pressed rounded-xl p-1 flex">
+          <button class="mode-btn active rounded-lg p-2 text-primary bg-white/5 transition-all flex items-center" data-mode="camera" title="Camera & Voice">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span>
+          </button>
+          <button class="mode-btn rounded-lg p-2 text-on-surface-variant hover:text-white transition-all flex items-center" data-mode="url-video" title="Watch Video">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_display</span>
+          </button>
+          <button class="mode-btn rounded-lg p-2 text-on-surface-variant hover:text-white transition-all flex items-center" data-mode="music" title="Listen to Music">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">headphones</span>
+          </button>
+        </div>
+        
+        <button id="invite-btn" class="hidden md:flex px-4 py-2 rounded-xl neo-button-primary font-bold items-center gap-2 text-sm">
+          <span class="material-symbols-outlined text-sm">person_add</span>
+          Invite
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="room-main p-4 md:p-6">
+      
+      <!-- Camera Mode -->
+      <div id="camera-view" class="view-layer active p-4 md:p-6">
+        <div class="video-grid flex flex-col md:flex-row w-full h-full gap-6">
+          
+          <div class="video-wrapper flex-1 relative bg-black neo-extruded rounded-[2rem] overflow-hidden">
+            <video id="local-video" class="w-full h-full object-cover" autoplay muted playsinline></video>
+            <div class="absolute bottom-4 left-4 bg-background/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-success"></div>
+              <span id="local-label" class="font-medium text-sm">You</span>
+            </div>
+          </div>
+          
+          <div class="video-wrapper flex-1 relative bg-surface-container-low neo-extruded rounded-[2rem] overflow-hidden flex items-center justify-center">
+            <video id="remote-video" class="w-full h-full object-cover absolute inset-0 z-10" autoplay playsinline></video>
+            <div class="z-0 flex flex-col items-center opacity-50">
+              <span class="material-symbols-outlined text-6xl mb-4">account_circle</span>
+              <span id="remote-label" class="font-medium">Waiting for friend...</span>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- URL Video Mode -->
+      <div id="url-video-view" class="view-layer hidden p-4 md:p-6">
+        <div class="w-full h-full neo-extruded rounded-[2rem] flex flex-col overflow-hidden bg-black/50">
+          <div class="p-4 bg-background/80 backdrop-blur-md border-b border-white/5 flex gap-4">
+            <input type="text" id="video-url-input" placeholder="Paste .mp4 or video link here..." 
+                   class="flex-1 px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
+            <button id="load-video-btn" class="px-8 py-3 rounded-xl neo-button-primary font-bold">Sync</button>
+          </div>
+          <div class="flex-1 flex items-center justify-center p-4">
+            <video id="sync-video" playsinline controls class="w-full max-h-full rounded-xl shadow-2xl"></video>
+          </div>
+        </div>
+      </div>
+
+      <!-- Music Mode -->
+      <div id="music-view" class="view-layer hidden p-4 md:p-6">
+        <div class="w-full h-full neo-extruded rounded-[2rem] flex flex-col items-center justify-center p-8 text-center">
+          <div class="w-24 h-24 rounded-3xl neo-pressed flex items-center justify-center mb-8">
+            <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+          </div>
+          <h3 class="text-3xl font-bold mb-4">Music Mixer</h3>
+          <p class="text-on-surface-variant max-w-md mb-10">Select an audio file from your device. It will stream in perfect sync to your friend while you can still talk.</p>
+          
+          <label class="px-8 py-4 rounded-xl neo-button-primary font-bold cursor-pointer inline-flex items-center gap-2 hover:scale-105 transition-all">
+            <span class="material-symbols-outlined">audio_file</span>
+            Select Audio File
+            <input type="file" id="music-file-input" accept="audio/*" class="hidden">
+          </label>
+          
+          <div class="mt-8 flex flex-col items-center gap-4">
+            <p id="now-playing" class="font-medium text-lg text-primary"></p>
+            <button id="stop-music-btn" class="px-6 py-2 rounded-xl neo-button hidden text-error font-bold border border-error/50">Stop Music</button>
+          </div>
+        </div>
+      </div>
+      
+    </main>
+
+    <!-- Bottom Controls -->
+    <footer class="room-footer bg-background/90 backdrop-blur-xl border-t border-white/5 flex justify-center items-center px-6 relative">
+      
+      <button id="invite-btn-mobile" onclick="document.getElementById('invite-btn').click()" class="md:hidden absolute left-6 w-12 h-12 rounded-full neo-button flex justify-center items-center text-primary">
+        <span class="material-symbols-outlined">person_add</span>
+      </button>
+
+      <div class="flex items-center gap-6">
+        <button id="toggle-mic" class="w-14 h-14 rounded-2xl neo-button flex justify-center items-center hover:text-primary transition-colors group">
+          <span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">mic</span>
+        </button>
+        <button id="toggle-cam" class="w-14 h-14 rounded-2xl neo-button flex justify-center items-center hover:text-primary transition-colors group">
+          <span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">videocam</span>
+        </button>
+        <button id="share-screen" class="w-14 h-14 rounded-2xl neo-button flex justify-center items-center hover:text-primary transition-colors group">
+          <span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">screen_share</span>
+        </button>
+      </div>
+
+      <button id="leave-room-btn" class="absolute right-6 px-6 py-3 rounded-xl bg-error/10 text-error border border-error/30 font-bold hover:bg-error hover:text-white transition-all">
+        Leave
+      </button>
+
+    </footer>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  
+  <script>
+    window.updateUIOverride = function(mode) {
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.classList.remove('active', 'text-primary', 'bg-white/5');
+        b.classList.add('text-on-surface-variant');
+      });
+      const activeBtn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
+      if(activeBtn) {
+        activeBtn.classList.remove('text-on-surface-variant');
+        activeBtn.classList.add('active', 'text-primary', 'bg-white/5');
+      }
+
+      document.querySelectorAll('.view-layer').forEach(v => {
+        v.classList.remove('active');
+        v.classList.add('hidden');
+      });
+
+      const targetView = document.getElementById(`${mode}-view`);
+      if(targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('active');
+      }
+
+      if (mode === 'url-video') {
+        const camView = document.getElementById('camera-view');
+        camView.classList.remove('hidden');
+        camView.classList.add('pip-mode');
+      } else {
+        document.getElementById('camera-view').classList.remove('pip-mode');
+      }
+    };
+  </script>
+
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script src="/js/socket-client.js"></script>
+  <script src="/js/webrtc.js"></script>
+  <script src="/js/video-sync.js"></script>
+  <script src="/js/music.js"></script>
+  <script src="/js/room.js"></script>
+  
+  <script>
+    if (redirectIfNotLoggedIn()) throw new Error('Not logged in');
+    updateUIForMode = window.updateUIOverride;
+  </script>
+</body>
+</html>

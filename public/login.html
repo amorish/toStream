@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Login - toStream</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "on-surface-variant": "#a1a3b1",
+                    "on-surface": "#f0f2f8",
+                    "surface-container-highest": "#242426",
+                    "primary-container": "#4f46e5",
+                    "on-primary-fixed-variant": "#c7d2fe",
+                    "on-error-container": "#f87171",
+                    "secondary-fixed": "#2a2b2f",
+                    "outline-variant": "#3f4046",
+                    "surface-container-low": "#1a1a1c",
+                    "on-tertiary-container": "#ddd6fe",
+                    "on-background": "#f0f2f8",
+                    "background": "#131313",
+                    "on-secondary-fixed-variant": "#d1d5db",
+                    "error": "#ef4444",
+                    "surface": "#131313",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed": "#e0e7ff",
+                    "secondary-container": "#2a2b2f",
+                    "error-container": "#450a0a",
+                    "tertiary-container": "#5b21b6",
+                    "surface-container-high": "#2c2c2e",
+                    "inverse-on-surface": "#131313",
+                    "inverse-surface": "#f0f2f8",
+                    "surface-variant": "#25262b",
+                    "tertiary": "#a78bfa",
+                    "secondary-fixed-dim": "#4b4d5a",
+                    "on-tertiary-fixed-variant": "#c4b5fd",
+                    "inverse-primary": "#6366f1",
+                    "surface-dim": "#0e0e0f",
+                    "surface-bright": "#1e1e20",
+                    "tertiary-fixed-dim": "#7c3aed",
+                    "primary-fixed-dim": "#4f46e5",
+                    "surface-tint": "#6366f1",
+                    "surface-container": "#202022",
+                    "outline": "#585a68",
+                    "on-tertiary-fixed": "#f5f3ff",
+                    "on-primary-container": "#e0e2ff",
+                    "on-secondary-fixed": "#f9fafb",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#ede9fe",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#0a0a0a",
+                    "secondary": "#9ca3af",
+                    "primary": "#6366f1",
+                    "primary-fixed": "#e0e2ff",
+                    "on-secondary-container": "#d1d5db"
+                },
+                "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+                },
+                "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+                }
+            }
+        }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/neo.css">
+</head>
+<body class="bg-background text-on-background font-body antialiased min-h-screen flex items-center justify-center p-6">
+
+  <div class="w-full max-w-md">
+    <div class="neo-extruded rounded-[2rem] p-10 relative">
+      <button type="button" class="absolute top-6 left-6 w-10 h-10 rounded-full neo-button flex justify-center items-center text-on-surface-variant hover:text-primary transition-colors" 
+              onclick="window.location.href='/'">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+      </button>
+      <div class="text-center mb-10 mt-2">
+        <div class="text-3xl font-extrabold text-primary cursor-pointer inline-block" onclick="window.location.href='/'">
+          toStream
+        </div>
+        <h2 class="text-2xl font-bold mt-6">Welcome Back</h2>
+      </div>
+
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Email</label>
+          <input type="email" id="email" required placeholder="john@example.com"
+                 class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1 transition-all">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Password</label>
+          <input type="password" id="password" required 
+                 class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1 transition-all">
+        </div>
+        
+        <button type="submit" id="login-btn" class="w-full py-4 rounded-xl neo-button-primary font-bold text-lg mt-4">
+          Login
+        </button>
+      </form>
+      
+      <p class="text-center mt-8 text-on-surface-variant">
+        Don't have an account? <a href="/register.html" class="text-primary hover:text-white transition-colors font-bold">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    redirectIfLoggedIn('/dashboard.html');
+  </script>
+</body>
+</html>
