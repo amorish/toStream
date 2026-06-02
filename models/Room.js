@@ -13,6 +13,12 @@ const RoomSchema = new mongoose.Schema({
     maxlength: 50,
     default: ''
   },
+  description: {
+    type: String,
+    trim: true,
+    maxlength: 500,
+    default: ''
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

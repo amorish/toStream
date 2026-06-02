@@ -148,8 +148,12 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-on-surface-variant mb-2">Password (optional)</label>
-          <input type="password" id="room-password" placeholder="Leave blank for open room" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Description (optional)</label>
+          <textarea id="room-description" placeholder="What is this meeting about?" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Password (required)</label>
+          <input type="password" id="room-password" required placeholder="Set a secure password" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
         </div>
         <button type="submit" id="create-btn" class="w-full py-4 rounded-xl neo-button-primary font-bold mt-4">Create & Join</button>
       </form>
@@ -200,6 +204,7 @@
               <div>
                 <h4 class="text-xl font-bold text-on-background mb-2">${escapeHtml(room.name || 'Unnamed Room')}</h4>
                 <p class="font-mono text-sm text-primary mb-2">${room.roomId}</p>
+                ${room.description ? `<p class="text-sm text-on-surface mb-3 line-clamp-2">${escapeHtml(room.description)}</p>` : ''}
                 <p class="text-xs text-on-surface-variant mb-6">${formatDate(room.createdAt)}</p>
               </div>
               <div class="flex justify-end">

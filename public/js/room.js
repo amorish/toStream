@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         isCreator = true;
         const leaveBtn = document.getElementById('leave-room-btn');
         if (leaveBtn) {
-          leaveBtn.textContent = 'End';
+          const textSpan = document.getElementById('leave-btn-text');
+          if (textSpan) textSpan.textContent = 'End';
+          else leaveBtn.textContent = 'End';
         }
       }
     }

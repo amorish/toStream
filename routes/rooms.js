@@ -12,7 +12,12 @@ router.use(protect);
 
 router.post('/create', roomCreateLimiter, createRoomRules, validate, async (req, res) => {
   try {
-    const { name, mode, password } = req.body;
+    const { name, mode, password, description } = req.body;
+    
+    if (!password || password.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Password is required to create a meeting.' });
+    }
+
     let roomId = nanoid(10);
     
     let collisionCount = 0;
@@ -33,13 +38,12 @@ router.post('/create', roomCreateLimiter, createRoomRules, validate, async (req,
       createdBy: req.user._id,
       participants: [{ userId: req.user._id }],
       mode: mode || 'camera',
-      name: name || ''
+      name: name || '',
+      description: description || ''
     };
 
-    if (password && password.trim().length > 0) {
-      const salt = await bcrypt.genSalt(10);
-      roomData.roomPassword = await bcrypt.hash(password, salt);
-    }
+    const salt = await bcrypt.genSalt(10);
+    roomData.roomPassword = await bcrypt.hash(password, salt);
 
     const room = await Room.create(roomData);
 
@@ -126,7 +130,7 @@ router.post('/join', joinRoomRules, validate, async (req, res) => {
 router.get('/history', async (req, res) => {
   try {
     const rooms = await Room.find({ roomId: { $in: req.user.roomHistory } })
-      .select('roomId name mode isActive createdAt expiresAt')
+      .select('roomId name description mode isActive createdAt expiresAt')
       .sort({ createdAt: -1 })
       .limit(10);
     

@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     const btn = document.getElementById('create-btn');
     const name = document.getElementById('room-name').value;
+    const description = document.getElementById('room-description') ? document.getElementById('room-description').value : '';
     const mode = document.getElementById('room-mode').value;
     const password = document.getElementById('room-password').value;
 
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const data = await apiFetch('/api/rooms/create', {
       method: 'POST',
-      body: JSON.stringify({ name, mode, password })
+      body: JSON.stringify({ name, mode, password, description })
     });
 
     btn.disabled = false;
@@ -60,6 +61,7 @@ async function loadHistory() {
         <div class="room-info">
           <h4>${escapeHtml(room.name || 'Unnamed Room')}</h4>
           <span class="room-id">ID: ${room.roomId}</span>
+          ${room.description ? `<p class="text-sm text-on-surface-variant my-2">${escapeHtml(room.description)}</p>` : ''}
           <span class="room-date">${formatDate(room.createdAt)}</span>
         </div>
         <div class="room-actions">
