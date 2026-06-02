@@ -125,7 +125,6 @@ function setupUIListeners() {
       }).catch(console.error);
     } else {
       copyToClipboard(window.location.href);
-      showToast('Link copied to clipboard!', 'success');
     }
   });
 
@@ -133,7 +132,6 @@ function setupUIListeners() {
   if (copyBtn) {
     copyBtn.addEventListener('click', () => {
       copyToClipboard(window.location.href);
-      showToast('Link copied to clipboard!', 'success');
     });
   }
 
