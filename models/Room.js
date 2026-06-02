@@ -81,7 +81,6 @@ RoomSchema.statics.findActiveByRoomId = function(roomId) {
   });
 };
 
-RoomSchema.index({ roomId: 1 }, { unique: true });
 RoomSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 RoomSchema.index({ isActive: 1, createdBy: 1 });
 
