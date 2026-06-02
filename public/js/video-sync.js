@@ -88,6 +88,9 @@ class VideoSyncManager {
   }
 
   _setSource(url) {
+    const placeholder = document.getElementById('video-placeholder');
+    if (placeholder) placeholder.classList.add('hidden');
+    
     const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
     if (isYouTube) {
       let videoId = '';

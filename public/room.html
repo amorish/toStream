@@ -189,8 +189,9 @@
                    class="flex-1 px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
             <button id="load-video-btn" class="px-8 py-3 rounded-xl neo-button-primary font-bold">Sync</button>
           </div>
-          <div class="flex-1 flex items-center justify-center p-4">
-            <video id="sync-video" playsinline controls class="w-full max-h-full rounded-xl shadow-2xl"></video>
+          <div class="flex-1 flex items-center justify-center p-4 relative">
+            <img id="video-placeholder" src="/img/videoshare.gif" alt="Waiting for video" class="absolute w-64 h-64 object-contain opacity-50 z-0 rounded-3xl">
+            <video id="sync-video" playsinline controls class="w-full max-h-full rounded-xl shadow-2xl relative z-10"></video>
           </div>
         </div>
       </div>
@@ -198,8 +199,8 @@
       <!-- Music Mode -->
       <div id="music-view" class="view-layer hidden p-4 md:p-6">
         <div class="w-full h-full neo-extruded rounded-[2rem] flex flex-col items-center justify-center p-8 text-center">
-          <div class="w-24 h-24 rounded-3xl neo-pressed flex items-center justify-center mb-8">
-            <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+          <div class="w-32 h-32 mb-8 relative">
+            <img src="/img/music.gif" alt="Music Mixer" class="w-full h-full object-cover rounded-3xl opacity-80 mix-blend-screen">
           </div>
           <h3 class="text-3xl font-bold mb-4">Music Mixer</h3>
           <p class="text-on-surface-variant max-w-md mb-10">Select an audio file from your device. It will stream in perfect sync to your friend while you can still talk.</p>
