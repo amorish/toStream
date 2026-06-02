@@ -210,7 +210,7 @@
           <a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Contact</a>
         </nav>
         <div class="flex gap-4">
-          <a class="w-12 h-12 rounded-full neo-button flex items-center justify-center hover:text-primary text-on-surface-variant cursor-pointer" onclick="if(navigator.share){navigator.share({title:'toStream',url:'https://twostream.onrender.com/'})}else{navigator.clipboard.writeText('https://twostream.onrender.com/');alert('Link copied to clipboard!')}">
+          <a class="w-12 h-12 rounded-full neo-button flex items-center justify-center hover:text-primary text-on-surface-variant" href="#" onclick="event.preventDefault(); if(navigator.share){navigator.share({title:'toStream',url:'https://twostream.onrender.com/'}).catch(()=>{})}else{try{navigator.clipboard.writeText('https://twostream.onrender.com/');alert('Link copied to clipboard!')}catch(e){alert('Please share this link: https://twostream.onrender.com/')}}">
             <span class="material-symbols-outlined text-lg">share</span>
           </a>
           <a class="w-12 h-12 rounded-full neo-button flex items-center justify-center hover:text-primary text-on-surface-variant" href="mailto:contact.manish.help@gmail.com">
