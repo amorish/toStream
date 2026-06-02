@@ -95,7 +95,10 @@
     }
   </script>
   <link rel="stylesheet" href="/css/neo.css">
-<link rel="icon" href="/img/orglogo.webp" type="image/webp">
+  <link rel="icon" href="/img/orglogo.webp" type="image/webp">
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script>redirectIfLoggedIn('/dashboard.html');</script>
 </head>
 <body class="bg-background text-on-background font-body antialiased">
   <!-- TopNavBar -->
@@ -228,11 +231,7 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="/js/config.js"></script>
-  <script src="/js/utils.js"></script>
   <script>
-    redirectIfLoggedIn('/dashboard.html');
-    
     // Sticky header transition
     window.addEventListener('scroll', () => {
         const header = document.querySelector('header .neo-extruded');
