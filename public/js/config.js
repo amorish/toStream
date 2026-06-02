@@ -1,7 +1,5 @@
 const TOSTREAM_CONFIG = {
-  SERVER_URL: window.location.hostname === 'localhost'
-    ? 'http://localhost:3000'
-    : 'https://YOUR_RENDER_APP_NAME.onrender.com',
+  SERVER_URL: window.location.origin,
 
   TOKEN_KEY: 'tostream_token',
   USER_KEY: 'tostream_user',
