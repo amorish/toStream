@@ -23,12 +23,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   webrtc.onRemoteStream = (stream) => {
     document.getElementById('remote-video').srcObject = stream;
+    document.getElementById('remote-waiting-layer').classList.add('hidden');
+    document.getElementById('remote-overlay-container').classList.remove('hidden');
+    startVoiceAnalyzer(stream, document.getElementById('remote-waveform'));
   };
 
   try {
     const stream = await webrtc.startLocalStream({ video: true, audio: true });
     document.getElementById('local-video').srcObject = stream;
     musicMixer = new MusicMixer(stream);
+    startVoiceAnalyzer(stream, document.getElementById('local-waveform'));
   } catch (err) {
     if (err.message === 'PERMISSION_DENIED') {
       showToast('Camera/Mic permission denied.', 'error');
@@ -71,6 +75,8 @@ function setupSocketListeners() {
   socket.on('user-left', (data) => {
     document.getElementById('remote-label').textContent = 'Waiting for friend...';
     document.getElementById('remote-video').srcObject = null;
+    document.getElementById('remote-waiting-layer').classList.remove('hidden');
+    document.getElementById('remote-overlay-container').classList.add('hidden');
     webrtc.destroy();
     webrtc.createPeerConnection(); 
     webrtc.addLocalStreamToPeer();
@@ -231,3 +237,64 @@ window.addEventListener('beforeunload', () => {
   socket.emit('leave-room', { roomId });
   disconnectSocket();
 });
+
+let sharedAudioContext = null;
+
+function startVoiceAnalyzer(stream, waveformElement) {
+  if (!stream.getAudioTracks().length) return;
+  
+  if (!sharedAudioContext) {
+    sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  
+  try {
+    // Safari/some browsers need the track to be played first or MediaStreamSource might fail if stream is inactive.
+    const analyser = sharedAudioContext.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.5;
+    
+    // Create source from the stream
+    const source = sharedAudioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    // Auto-resume audio context on user interaction if suspended
+    if (sharedAudioContext.state === 'suspended') {
+      const resumeAudio = () => {
+        sharedAudioContext.resume();
+        document.removeEventListener('click', resumeAudio);
+        document.removeEventListener('touchstart', resumeAudio);
+      };
+      document.addEventListener('click', resumeAudio);
+      document.addEventListener('touchstart', resumeAudio);
+    }
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    
+    function checkVolume() {
+      if (!waveformElement.isConnected || stream.getTracks().every(t => t.readyState === 'ended')) {
+        waveformElement.classList.remove('speaking');
+        return;
+      }
+      
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / dataArray.length;
+      
+      // Volume threshold
+      if (average > 12) {
+        waveformElement.classList.add('speaking');
+      } else {
+        waveformElement.classList.remove('speaking');
+      }
+      
+      requestAnimationFrame(checkVolume);
+    }
+    
+    checkVolume();
+  } catch (err) {
+    console.warn('Audio analyzer failed to start:', err);
+  }
+}

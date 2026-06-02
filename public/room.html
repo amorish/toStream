@@ -7,7 +7,8 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
   <script id="tailwind-config">
     tailwind.config = {
         darkMode: "class",
@@ -94,7 +95,15 @@
     @media (max-width: 768px) { .pip-mode .video-grid { width: 150px; } .pip-mode .video-wrapper { height: 84px; } }
     
     /* Fix Plyr Video Size */
-    .plyr { width: 100%; max-height: 100%; border-radius: 1rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .plyr { width: 100%; max-width: 1200px; aspect-ratio: 16 / 9; max-height: 100%; margin: 0 auto; border-radius: 1rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .plyr__video-wrapper { height: 100% !important; padding-bottom: 0 !important; }
+    .plyr iframe { width: 100% !important; height: 100% !important; }
+
+    /* Waveform Animation */
+    .waveform.speaking span { animation: pulse-wave 0.4s infinite alternate ease-in-out; }
+    .waveform.speaking span:nth-child(2) { animation-delay: 0.15s; }
+    .waveform.speaking span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pulse-wave { 0% { height: 3px; } 100% { height: 12px; } }
   </style>
 </head>
 <body class="bg-background text-on-background font-body antialiased room-body">
@@ -142,6 +151,11 @@
           <div class="video-wrapper flex-1 relative bg-black neo-extruded rounded-[2rem] overflow-hidden">
             <video id="local-video" class="w-full h-full object-cover" autoplay muted playsinline></video>
             <div class="absolute bottom-4 left-4 bg-background/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2">
+              <div id="local-waveform" class="waveform w-4 h-3 flex items-center gap-[2px]">
+                <span class="w-[3px] h-[3px] bg-success rounded-full transition-all duration-100"></span>
+                <span class="w-[3px] h-[3px] bg-success rounded-full transition-all duration-100"></span>
+                <span class="w-[3px] h-[3px] bg-success rounded-full transition-all duration-100"></span>
+              </div>
               <div class="w-2 h-2 rounded-full bg-success"></div>
               <span id="local-label" class="font-medium text-sm">You</span>
             </div>
@@ -149,9 +163,18 @@
           
           <div class="video-wrapper flex-1 relative bg-surface-container-low neo-extruded rounded-[2rem] overflow-hidden flex items-center justify-center">
             <video id="remote-video" class="w-full h-full object-cover absolute inset-0 z-10" autoplay playsinline></video>
-            <div class="z-0 flex flex-col items-center opacity-50">
+            <div class="z-0 flex flex-col items-center opacity-50" id="remote-waiting-layer">
               <span class="material-symbols-outlined text-6xl mb-4">account_circle</span>
               <span id="remote-label" class="font-medium">Waiting for friend...</span>
+            </div>
+            
+            <div id="remote-overlay-container" class="hidden absolute bottom-4 left-4 z-20 bg-background/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2">
+              <div id="remote-waveform" class="waveform w-4 h-3 flex items-center gap-[2px]">
+                <span class="w-[3px] h-[3px] bg-primary rounded-full transition-all duration-100"></span>
+                <span class="w-[3px] h-[3px] bg-primary rounded-full transition-all duration-100"></span>
+                <span class="w-[3px] h-[3px] bg-primary rounded-full transition-all duration-100"></span>
+              </div>
+              <span id="remote-overlay-label" class="font-medium text-sm">Friend</span>
             </div>
           </div>
           
