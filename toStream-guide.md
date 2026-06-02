@@ -106,7 +106,7 @@ Create all of these before writing a single line of code. All are free, all work
 - Cluster name: `tostream-cluster`
 - Create a database user: username + strong password → **save these** → you'll put them in your `.env`
 - Network Access → Add IP Address → Allow Access from Anywhere (`0.0.0.0/0`) for now
-- Connect → Drivers → Copy the connection string (looks like `mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/`)
+- Connect → Drivers → Copy the connection string (looks like `mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/`)
 
 ### 4.3 OpenRelayProject — https://openrelayproject.org
 - Click Get Started → create free account
@@ -295,7 +295,7 @@ PORT=3000
 NODE_ENV=development
 
 # ─── MongoDB Atlas ────────────────────────────────
-MONGODB_URI=mongodb+srv://YOUR_DB_USER:YOUR_DB_PASS@cluster0.xxxxx.mongodb.net/tostream?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<YOUR_DB_USER>:<YOUR_DB_PASS>@cluster0.xxxxx.mongodb.net/tostream?retryWrites=true&w=majority
 
 # ─── JWT Auth ─────────────────────────────────────
 # Generate a secret: open terminal, type: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
@@ -374,7 +374,7 @@ git remote add origin https://github.com/YOUR_USERNAME/tostream.git
 
 Your connection string from Atlas should look like:
 ```
-mongodb+srv://myuser:mypassword@cluster0.abc123.mongodb.net/tostream?retryWrites=true&w=majority
+mongodb+srv://<myuser>:<mypassword>@cluster0.abc123.mongodb.net/tostream?retryWrites=true&w=majority
 ```
 
 **Important:** If your password contains `@`, `#`, `%`, `+`, `:`, `/`, or `?` — replace them with their URL-encoded versions:

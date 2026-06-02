@@ -1,4 +1,7 @@
-# toStream
+<div align="center">
+  <img src="public/img/orglogo.webp" alt="toStream Logo" width="150" />
+  <h1>toStream</h1>
+</div>
 
 Private streaming app for two friends. Built with Node.js, Express, Socket.io, WebRTC, and MongoDB.
 
