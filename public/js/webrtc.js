@@ -13,6 +13,8 @@ class WebRTCManager {
     this.onRemoteStream = null;
     this.onConnectionStateChange = null;
     this.onIceCandidateError = null;
+    this.onScreenShareEnded = null;
+    this.currentVideoTrack = null;
   }
 
   createPeerConnection() {
@@ -45,6 +47,7 @@ class WebRTCManager {
   async startLocalStream(constraints) {
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.currentVideoTrack = this.localStream.getVideoTracks()[0];
       return this.localStream;
     } catch (err) {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
@@ -59,9 +62,12 @@ class WebRTCManager {
 
   addLocalStreamToPeer() {
     if (!this.localStream || !this.peerConnection) return;
-    this.localStream.getTracks().forEach(track => {
+    this.localStream.getAudioTracks().forEach(track => {
       this.peerConnection.addTrack(track, this.localStream);
     });
+    if (this.currentVideoTrack) {
+      this.peerConnection.addTrack(this.currentVideoTrack, this.localStream);
+    }
   }
 
   async createOffer() {
@@ -128,8 +134,11 @@ class WebRTCManager {
   }
 
   async replaceVideoTrack(newTrack) {
-    const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-    if (sender) await sender.replaceTrack(newTrack);
+    this.currentVideoTrack = newTrack;
+    if (this.peerConnection) {
+      const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+      if (sender) await sender.replaceTrack(newTrack);
+    }
   }
 
   async startScreenShare() {
@@ -137,7 +146,10 @@ class WebRTCManager {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
       const videoTrack = screenStream.getVideoTracks()[0];
       await this.replaceVideoTrack(videoTrack);
-      videoTrack.onended = () => this.stopScreenShare();
+      videoTrack.onended = () => {
+        this.stopScreenShare();
+        if (this.onScreenShareEnded) this.onScreenShareEnded();
+      };
       return screenStream;
     } catch (err) {
       if (err.name === 'NotAllowedError') throw new Error('SCREEN_SHARE_DENIED');

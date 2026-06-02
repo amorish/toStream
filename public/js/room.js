@@ -154,18 +154,25 @@ function setupUIListeners() {
     }
   });
 
+  webrtc.onScreenShareEnded = () => {
+    const btn = document.getElementById('share-screen');
+    btn.classList.add('neo-button', 'hover:text-primary');
+    btn.classList.remove('neo-pressed', 'text-success', 'hover:text-green-400');
+    btn.querySelector('span').textContent = 'screen_share';
+    document.getElementById('local-video').srcObject = webrtc.localStream;
+  };
+
   document.getElementById('share-screen').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
     const isSharing = btn.classList.contains('neo-pressed');
     
     if (isSharing) {
       await webrtc.stopScreenShare();
-      btn.classList.add('neo-button', 'hover:text-primary');
-      btn.classList.remove('neo-pressed', 'text-success', 'hover:text-green-400');
-      btn.querySelector('span').textContent = 'screen_share';
+      webrtc.onScreenShareEnded();
     } else {
       try {
-        await webrtc.startScreenShare();
+        const screenStream = await webrtc.startScreenShare();
+        document.getElementById('local-video').srcObject = screenStream;
         btn.classList.remove('neo-button', 'hover:text-primary');
         btn.classList.add('neo-pressed', 'text-success', 'hover:text-green-400');
         btn.querySelector('span').textContent = 'stop_screen_share';
