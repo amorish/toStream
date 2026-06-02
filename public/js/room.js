@@ -156,9 +156,14 @@ function setupUIListeners() {
     }
   });
 
-  document.getElementById('toggle-cam').addEventListener('click', (e) => {
-    const isOff = webrtc.toggleCamera();
+  document.getElementById('toggle-cam').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
+    // visual feedback while waiting
+    btn.style.opacity = '0.5';
+    
+    const isOff = await webrtc.toggleCamera();
+    btn.style.opacity = '1';
+    
     if (isOff) {
       btn.classList.remove('neo-button', 'hover:text-primary');
       btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');

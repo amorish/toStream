@@ -118,12 +118,32 @@ class WebRTCManager {
     return this.isMuted;
   }
 
-  toggleCamera() {
+  async toggleCamera() {
     if (!this.localStream) return this.isCameraOff;
-    const videoTrack = this.localStream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !videoTrack.enabled;
-      this.isCameraOff = !videoTrack.enabled;
+    
+    if (this.isCameraOff) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const newTrack = stream.getVideoTracks()[0];
+        this.localStream.addTrack(newTrack);
+        this.isCameraOff = false;
+        
+        document.getElementById('local-video').srcObject = this.localStream;
+        await this.replaceVideoTrack(newTrack);
+      } catch (err) {
+        console.warn('Failed to restart camera:', err);
+      }
+    } else {
+      const videoTrack = this.localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.stop();
+        this.localStream.removeTrack(videoTrack);
+        if (this.peerConnection) {
+          const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) sender.replaceTrack(null);
+        }
+      }
+      this.isCameraOff = true;
     }
     return this.isCameraOff;
   }
