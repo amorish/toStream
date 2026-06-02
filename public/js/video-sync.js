@@ -8,6 +8,10 @@ class VideoSyncManager {
     this.player = new Plyr(this.videoElement, {
       youtube: { noCookie: false, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
     });
+    
+    if (this.player.elements.container) {
+      this.player.elements.container.classList.add('hidden');
+    }
 
     this.isLocalAction = true;
     this.syncThreshold = 2.0; 
@@ -90,6 +94,10 @@ class VideoSyncManager {
   _setSource(url) {
     const placeholder = document.getElementById('video-placeholder');
     if (placeholder) placeholder.classList.add('hidden');
+    
+    if (this.player.elements.container) {
+      this.player.elements.container.classList.remove('hidden');
+    }
     
     const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
     if (isYouTube) {

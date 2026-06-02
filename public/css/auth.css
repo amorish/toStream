@@ -22,3 +22,9 @@
   margin-bottom: 2rem;
   font-weight: 700;
 }
+
+@media (max-width: 480px) {
+  .auth-container { padding: 1rem; }
+  .auth-card { padding: 2rem 1.5rem; }
+  .auth-card h2 { margin-bottom: 1.5rem; font-size: 1.5rem; }
+}

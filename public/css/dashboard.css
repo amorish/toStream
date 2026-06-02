@@ -78,3 +78,15 @@
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
 }
+
+@media (max-width: 768px) {
+  .dashboard-container { margin: 2rem auto; padding: 0 1rem; }
+  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; }
+  .rooms-list { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container { margin: 1.5rem auto; padding: 0 1rem; }
+  .rooms-list { grid-template-columns: 1fr; }
+  .dashboard-header h2 { font-size: 1.5rem; }
+}

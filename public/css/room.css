@@ -218,4 +218,14 @@
   .room-header { height: auto; flex-direction: column; padding: 10px; gap: 10px; }
   .pip-mode .video-grid { width: 150px; }
   .pip-mode .video-wrapper { height: 84px; }
+  .room-footer { padding: 0 15px; position: relative; justify-content: center; }
+  .controls-group { position: static; transform: none; gap: 10px; }
+  .url-input-container { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .control-btn { width: 40px; height: 40px; font-size: 1rem; }
+  .room-header { padding: 5px; }
+  #room-title { font-size: 1rem; text-align: center; }
+  .header-right { flex-wrap: wrap; justify-content: center; gap: 10px; }
 }
