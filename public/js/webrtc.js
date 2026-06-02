@@ -80,6 +80,8 @@ class WebRTCManager {
     });
     if (this.currentVideoTrack) {
       this.peerConnection.addTrack(this.currentVideoTrack, this.localStream);
+    } else {
+      this.peerConnection.addTransceiver('video', { direction: 'sendrecv', streams: [this.localStream] });
     }
   }
 
@@ -151,9 +153,10 @@ class WebRTCManager {
       if (videoTrack) {
         videoTrack.stop();
         this.localStream.removeTrack(videoTrack);
+        this.currentVideoTrack = null;
         if (this.peerConnection) {
-          const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if (sender) sender.replaceTrack(null);
+          const transceiver = this.peerConnection.getTransceivers().find(t => t.receiver.track && t.receiver.track.kind === 'video');
+          if (transceiver && transceiver.sender) transceiver.sender.replaceTrack(null);
         }
       }
       this.isCameraOff = true;
@@ -169,8 +172,8 @@ class WebRTCManager {
   async replaceVideoTrack(newTrack) {
     this.currentVideoTrack = newTrack;
     if (this.peerConnection) {
-      const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-      if (sender) await sender.replaceTrack(newTrack);
+      const transceiver = this.peerConnection.getTransceivers().find(t => t.receiver.track && t.receiver.track.kind === 'video');
+      if (transceiver && transceiver.sender) await transceiver.sender.replaceTrack(newTrack);
     }
   }
 
@@ -191,8 +194,11 @@ class WebRTCManager {
   }
 
   async stopScreenShare() {
-    const videoTrack = this.localStream && this.localStream.getVideoTracks()[0];
-    if (videoTrack) await this.replaceVideoTrack(videoTrack);
+    let videoTrack = this.localStream && this.localStream.getVideoTracks()[0];
+    if (!videoTrack && this.isCameraOff) {
+       videoTrack = null;
+    }
+    await this.replaceVideoTrack(videoTrack);
   }
 
   handleConnectionFailed() {
