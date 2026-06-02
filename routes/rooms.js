@@ -24,6 +24,10 @@ router.post('/create', roomCreateLimiter, createRoomRules, validate, async (req,
       roomId = nanoid(10);
     }
 
+    // When admin creates a new room, their old rooms automatically expire
+    await Room.updateMany({ createdBy: req.user._id, isActive: true }, { isActive: false });
+
+
     const roomData = {
       roomId,
       createdBy: req.user._id,

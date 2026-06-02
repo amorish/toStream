@@ -139,8 +139,8 @@
             <span class="material-symbols-outlined text-sm">content_copy</span>
           </button>
           <button id="invite-btn" class="px-4 py-2 rounded-xl neo-button-primary font-bold flex items-center gap-2 text-sm">
-            <span class="material-symbols-outlined text-sm">person_add</span>
-            Invite
+            <span class="material-symbols-outlined text-sm">share</span>
+            Share
           </button>
         </div>
       </div>
@@ -151,7 +151,7 @@
       
       <!-- Camera Mode -->
       <div id="camera-view" class="view-layer active p-4 md:p-6">
-        <div class="video-grid flex flex-col md:flex-row w-full h-full gap-6">
+        <div class="video-grid flex flex-row w-full h-full gap-6">
           
           <div class="video-wrapper flex-1 relative bg-black neo-extruded rounded-[2rem] overflow-hidden">
             <video id="local-video" class="w-full h-full object-cover" autoplay muted playsinline></video>
@@ -228,9 +228,14 @@
     <!-- Bottom Controls -->
     <footer class="room-footer bg-background/90 backdrop-blur-xl border-t border-white/5 flex justify-center items-center px-6 relative">
       
-      <button id="invite-btn-mobile" onclick="document.getElementById('invite-btn').click()" class="md:hidden absolute left-6 w-12 h-12 rounded-full neo-button flex justify-center items-center text-primary">
-        <span class="material-symbols-outlined">person_add</span>
-      </button>
+      <div class="md:hidden absolute left-6 flex items-center gap-2 z-10">
+        <button id="invite-btn-mobile" onclick="document.getElementById('invite-btn').click()" class="w-12 h-12 rounded-full neo-button flex justify-center items-center text-primary bg-background/50 backdrop-blur" title="Share">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+        <button id="copy-link-btn-mobile" onclick="document.getElementById('copy-link-btn').click()" class="w-12 h-12 rounded-full neo-button flex justify-center items-center text-primary bg-background/50 backdrop-blur" title="Copy Link">
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+      </div>
 
       <div class="flex items-center gap-6">
         <button id="toggle-mic" class="w-14 h-14 rounded-2xl neo-button flex justify-center items-center hover:text-primary transition-colors group">
@@ -242,9 +247,12 @@
         <button id="share-screen" class="w-14 h-14 rounded-2xl neo-button flex justify-center items-center hover:text-primary transition-colors group">
           <span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">screen_share</span>
         </button>
+        <button id="fullscreen-btn" class="w-14 h-14 rounded-2xl neo-button flex justify-center items-center hover:text-primary transition-colors group hidden sm:flex">
+          <span class="material-symbols-outlined text-2xl group-active:scale-90 transition-transform">fullscreen</span>
+        </button>
       </div>
 
-      <button id="leave-room-btn" class="absolute right-6 px-6 py-3 rounded-xl bg-error/10 text-error border border-error/30 font-bold hover:bg-error hover:text-white transition-all">
+      <button id="leave-room-btn" class="absolute right-6 px-6 py-3 rounded-xl bg-error/10 text-error border border-error/30 font-bold hover:bg-error hover:text-white transition-all z-10">
         Leave
       </button>
 

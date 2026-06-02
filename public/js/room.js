@@ -5,6 +5,7 @@ let webrtc;
 let videoSync;
 let musicMixer;
 let currentMode = 'camera';
+let isCreator = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const user = getUser();
@@ -16,6 +17,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('room-title').textContent = data.room.name || 'Room: ' + roomId;
       currentMode = data.room.mode;
       updateUIForMode(currentMode);
+      if (data.room.createdBy === user._id || data.room.createdBy === user.id) {
+        isCreator = true;
+        const leaveBtn = document.getElementById('leave-room-btn');
+        if (leaveBtn) {
+          leaveBtn.textContent = 'End';
+        }
+      }
     }
   } catch (err) {}
 
@@ -135,10 +143,31 @@ function setupUIListeners() {
     });
   }
 
-  document.getElementById('leave-room-btn').addEventListener('click', () => {
-    socket.emit('leave-room', { roomId });
+  document.getElementById('leave-room-btn').addEventListener('click', async () => {
+    if (isCreator) {
+      try {
+        await apiFetch(`/api/rooms/${roomId}`, { method: 'DELETE' });
+      } catch (err) {}
+    } else {
+      socket.emit('leave-room', { roomId });
+    }
     window.location.href = '/dashboard.html';
   });
+
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {
+          showToast('Fullscreen not supported', 'warning');
+        });
+        fullscreenBtn.querySelector('span').textContent = 'fullscreen_exit';
+      } else {
+        document.exitFullscreen();
+        fullscreenBtn.querySelector('span').textContent = 'fullscreen';
+      }
+    });
+  }
 
   document.getElementById('toggle-mic').addEventListener('click', (e) => {
     const isMuted = webrtc.toggleMute();
