@@ -24,6 +24,13 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+input, textarea, .selectable-text {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 body {

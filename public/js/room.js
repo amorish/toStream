@@ -118,8 +118,24 @@ function setupSocketListeners() {
 
 function setupUIListeners() {
   document.getElementById('invite-btn').addEventListener('click', () => {
-    copyToClipboard(window.location.href);
+    if (navigator.share) {
+      navigator.share({
+        title: 'Join my room on toStream',
+        url: window.location.href
+      }).catch(console.error);
+    } else {
+      copyToClipboard(window.location.href);
+      showToast('Link copied to clipboard!', 'success');
+    }
   });
+
+  const copyBtn = document.getElementById('copy-link-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      copyToClipboard(window.location.href);
+      showToast('Link copied to clipboard!', 'success');
+    });
+  }
 
   document.getElementById('leave-room-btn').addEventListener('click', () => {
     socket.emit('leave-room', { roomId });
