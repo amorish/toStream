@@ -5,39 +5,37 @@ class MusicMixer {
     this.destination = this.audioContext.createMediaStreamDestination();
     
     this.micSource = null;
-    this.fileSource = null;
     this.mixedStream = null;
 
     if (this.localStream && this.localStream.getAudioTracks().length > 0) {
       this.micSource = this.audioContext.createMediaStreamSource(this.localStream);
       this.micSource.connect(this.destination);
     }
+    
+    // Set up the HTML5 audio element source
+    this.audioEl = document.getElementById('music-player');
+    if (this.audioEl) {
+      this.fileSource = this.audioContext.createMediaElementSource(this.audioEl);
+      this.fileSource.connect(this.destination); // Route to WebRTC
+      this.fileSource.connect(this.audioContext.destination); // Route to local speakers
+    }
   }
 
   async playFile(file) {
-    if (this.fileSource) {
-      this.fileSource.disconnect();
+    if (this.audioEl) {
+      const url = URL.createObjectURL(file);
+      this.audioEl.src = url;
+      this.audioEl.classList.remove('hidden');
+      await this.audioEl.play();
     }
-    
-    const arrayBuffer = await file.arrayBuffer();
-    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-    
-    this.fileSource = this.audioContext.createBufferSource();
-    this.fileSource.buffer = audioBuffer;
-    
-    this.fileSource.connect(this.destination);
-    this.fileSource.connect(this.audioContext.destination); // Play locally too
-    
-    this.fileSource.start();
-    
     return this.destination.stream.getAudioTracks()[0];
   }
   
   stopFile() {
-    if (this.fileSource) {
-      this.fileSource.stop();
-      this.fileSource.disconnect();
-      this.fileSource = null;
+    if (this.audioEl) {
+      this.audioEl.pause();
+      this.audioEl.src = '';
+      this.audioEl.classList.add('hidden');
     }
   }
   

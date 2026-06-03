@@ -400,7 +400,8 @@
             <input type="file" id="music-file-input" accept="audio/*" class="hidden">
           </label>
           
-          <div class="mt-8 flex flex-col items-center gap-4">
+          <div class="mt-8 flex flex-col items-center gap-4 w-full">
+            <audio id="music-player" controls class="hidden w-full max-w-md mt-4 rounded-xl shadow-lg border border-white/5"></audio>
             <p id="now-playing" class="font-medium text-lg text-primary"></p>
             <button id="stop-music-btn" class="px-6 py-2 rounded-xl neo-button hidden text-error font-bold border border-error/50">Stop Music</button>
           </div>
