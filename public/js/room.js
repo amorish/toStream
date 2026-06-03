@@ -101,6 +101,18 @@ async function joinRoom() {
     } else {
       showToast('No camera or microphone found.', 'warning');
     }
+    webrtc.isCameraOff = true;
+    webrtc.isMuted = true;
+    
+    const camBtn = document.getElementById('toggle-cam');
+    camBtn.classList.remove('neo-button', 'hover:text-primary');
+    camBtn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
+    camBtn.querySelector('span').textContent = 'videocam_off';
+
+    const micBtn = document.getElementById('toggle-mic');
+    micBtn.classList.remove('neo-button', 'hover:text-primary');
+    micBtn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
+    micBtn.querySelector('span').textContent = 'mic_off';
   }
 
   videoSync = new VideoSyncManager(socket, roomId, document.getElementById('sync-video'));
@@ -305,23 +317,36 @@ function setupUIListeners() {
     }
   });
 
-  document.getElementById('toggle-mic').addEventListener('click', (e) => {
-    const isMuted = webrtc.toggleMute();
-    
-    socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
-    
-    if (!isMuted) window.playSound('micon');
-    else window.playSound('click');
-    
+  let isMicToggling = false;
+  document.getElementById('toggle-mic').addEventListener('click', async (e) => {
+    if (isMicToggling) return;
+    isMicToggling = true;
     const btn = e.currentTarget;
-    if (isMuted) {
-      btn.classList.remove('neo-button', 'hover:text-primary');
-      btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
-      btn.querySelector('span').textContent = 'mic_off';
-    } else {
-      btn.classList.add('neo-button', 'hover:text-primary');
-      btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
-      btn.querySelector('span').textContent = 'mic';
+    btn.style.opacity = '0.5';
+
+    try {
+      const isMuted = await webrtc.toggleMute();
+      btn.style.opacity = '1';
+      isMicToggling = false;
+
+      socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
+      
+      if (!isMuted) window.playSound('micon');
+      else window.playSound('click');
+      
+      if (isMuted) {
+        btn.classList.remove('neo-button', 'hover:text-primary');
+        btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
+        btn.querySelector('span').textContent = 'mic_off';
+      } else {
+        btn.classList.add('neo-button', 'hover:text-primary');
+        btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
+        btn.querySelector('span').textContent = 'mic';
+      }
+    } catch (err) {
+      showToast('Please allow microphone access in your browser settings.', 'error');
+      btn.style.opacity = '1';
+      isMicToggling = false;
     }
   });
 
@@ -334,23 +359,29 @@ function setupUIListeners() {
     // visual feedback while waiting
     btn.style.opacity = '0.5';
     
-    const isOff = await webrtc.toggleCamera();
-    btn.style.opacity = '1';
-    isCameraToggling = false;
-    
-    socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
-    
-    if (!isOff) window.playSound('micon');
-    else window.playSound('click');
-    
-    if (isOff) {
-      btn.classList.remove('neo-button', 'hover:text-primary');
-      btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
-      btn.querySelector('span').textContent = 'videocam_off';
-    } else {
-      btn.classList.add('neo-button', 'hover:text-primary');
-      btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
-      btn.querySelector('span').textContent = 'videocam';
+    try {
+      const isOff = await webrtc.toggleCamera();
+      btn.style.opacity = '1';
+      isCameraToggling = false;
+      
+      socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
+      
+      if (!isOff) window.playSound('micon');
+      else window.playSound('click');
+      
+      if (isOff) {
+        btn.classList.remove('neo-button', 'hover:text-primary');
+        btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
+        btn.querySelector('span').textContent = 'videocam_off';
+      } else {
+        btn.classList.add('neo-button', 'hover:text-primary');
+        btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
+        btn.querySelector('span').textContent = 'videocam';
+      }
+    } catch (err) {
+      showToast('Please allow camera access in your browser settings.', 'error');
+      btn.style.opacity = '1';
+      isCameraToggling = false;
     }
   });
 

@@ -87,10 +87,16 @@ class WebRTCManager {
   }
 
   addLocalStreamToPeer() {
-    if (!this.localStream || !this.peerConnection) return;
-    this.localStream.getAudioTracks().forEach(track => {
-      this.peerConnection.addTrack(track, this.localStream);
-    });
+    if (!this.peerConnection) return;
+    if (!this.localStream) this.localStream = new MediaStream();
+    
+    const audioTracks = this.localStream.getAudioTracks();
+    if (audioTracks.length > 0) {
+      this.peerConnection.addTrack(audioTracks[0], this.localStream);
+    } else {
+      this.peerConnection.addTransceiver('audio', { direction: 'sendrecv', streams: [this.localStream] });
+    }
+
     if (this.currentVideoTrack) {
       this.peerConnection.addTrack(this.currentVideoTrack, this.localStream);
     } else {
@@ -157,18 +163,37 @@ class WebRTCManager {
     }
   }
 
-  toggleMute() {
-    if (!this.localStream) return this.isMuted;
-    const audioTrack = this.localStream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !audioTrack.enabled;
-      this.isMuted = !audioTrack.enabled;
+  async toggleMute() {
+    if (!this.localStream) this.localStream = new MediaStream();
+
+    let audioTrack = this.localStream.getAudioTracks()[0];
+    
+    if (this.isMuted) {
+      if (!audioTrack) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioTrack = stream.getAudioTracks()[0];
+          this.localStream.addTrack(audioTrack);
+          await this.replaceAudioTrack(audioTrack);
+        } catch (err) {
+          console.warn('Failed to start mic:', err);
+          throw err;
+        }
+      } else {
+        audioTrack.enabled = true;
+      }
+      this.isMuted = false;
+    } else {
+      if (audioTrack) {
+        audioTrack.enabled = false;
+      }
+      this.isMuted = true;
     }
     return this.isMuted;
   }
 
   async toggleCamera() {
-    if (!this.localStream) return this.isCameraOff;
+    if (!this.localStream) this.localStream = new MediaStream();
     
     if (this.isCameraOff) {
       try {
@@ -181,6 +206,7 @@ class WebRTCManager {
         await this.replaceVideoTrack(newTrack);
       } catch (err) {
         console.warn('Failed to restart camera:', err);
+        throw err;
       }
     } else {
       const videoTrack = this.localStream.getVideoTracks()[0];
@@ -188,10 +214,7 @@ class WebRTCManager {
         videoTrack.stop();
         this.localStream.removeTrack(videoTrack);
         this.currentVideoTrack = null;
-        if (this.peerConnection) {
-          const transceiver = this.peerConnection.getTransceivers().find(t => t.receiver.track && t.receiver.track.kind === 'video');
-          if (transceiver && transceiver.sender) transceiver.sender.replaceTrack(null);
-        }
+        await this.replaceVideoTrack(null);
       }
       this.isCameraOff = true;
     }
@@ -199,15 +222,27 @@ class WebRTCManager {
   }
 
   async replaceAudioTrack(newTrack) {
-    const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
-    if (sender) await sender.replaceTrack(newTrack);
+    if (this.peerConnection) {
+      const transceiver = this.peerConnection.getTransceivers().find(t => t.receiver.track && t.receiver.track.kind === 'audio');
+      if (transceiver && transceiver.sender) {
+        await transceiver.sender.replaceTrack(newTrack);
+      } else {
+        const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
+        if (sender) await sender.replaceTrack(newTrack);
+      }
+    }
   }
 
   async replaceVideoTrack(newTrack) {
     this.currentVideoTrack = newTrack;
     if (this.peerConnection) {
       const transceiver = this.peerConnection.getTransceivers().find(t => t.receiver.track && t.receiver.track.kind === 'video');
-      if (transceiver && transceiver.sender) await transceiver.sender.replaceTrack(newTrack);
+      if (transceiver && transceiver.sender) {
+        await transceiver.sender.replaceTrack(newTrack);
+      } else {
+        const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) await sender.replaceTrack(newTrack);
+      }
     }
   }
 
