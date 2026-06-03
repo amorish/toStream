@@ -66,9 +66,17 @@ module.exports = function initSignaling(io) {
         socket.join(roomId);
         socket.currentRoom = roomId;
 
-        const others = await io.in(roomId).fetchSockets();
+        const others = room.participants.filter(p => p.userId.toString() !== socket.user.id);
+        let existingUser = null;
+        if (others.length > 0) {
+           const otherId = others[0].userId;
+           const userObj = await User.findById(otherId).select('username');
+           if (userObj) {
+               existingUser = { username: userObj.username };
+           }
+        }
         
-        socket.emit('room-joined', { roomId, participants: room.participants.length, mode: room.mode, videoUrl: room.videoUrl });
+        socket.emit('room-joined', { roomId, participants: room.participants.length, mode: room.mode, videoUrl: room.videoUrl, existingUser });
         
         socket.to(roomId).emit('user-joined', { userId: socket.user.id, username: socket.user.username });
 

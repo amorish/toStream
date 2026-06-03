@@ -109,3 +109,46 @@ window.onclick = function(event) {
     event.target.style.display = 'none';
   }
 }
+
+window.openCreateModal = function() {
+  document.getElementById('create-modal').style.display = 'flex';
+  const code = generateRoomCode();
+  document.getElementById('room-password').value = code;
+  
+  const charsContainer = document.getElementById('room-code-chars');
+  if (charsContainer) {
+    charsContainer.innerHTML = '';
+    for (let char of code) {
+      const span = document.createElement('span');
+      span.className = 'w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl neo-extruded font-mono font-bold text-xl md:text-2xl text-primary shadow-inner';
+      span.textContent = char;
+      charsContainer.appendChild(span);
+    }
+  }
+};
+
+window.generateRoomCode = function() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
+window.copyRoomCode = function() {
+  const code = document.getElementById('room-password').value;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(() => {
+      showToast('Room Code copied!', 'success');
+    });
+  } else {
+    const tempInput = document.createElement('input');
+    tempInput.value = code;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    showToast('Room Code copied!', 'success');
+  }
+};

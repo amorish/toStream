@@ -40,9 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         isCreator = true;
         const leaveBtn = document.getElementById('leave-room-btn');
         if (leaveBtn) {
-          const textSpan = document.getElementById('leave-btn-text');
-          if (textSpan) textSpan.textContent = 'End';
-          else leaveBtn.textContent = 'End';
+          leaveBtn.title = 'End Room';
         }
       }
     } else if (data && !data.success) {
@@ -60,6 +58,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('remote-waiting-layer').classList.add('hidden');
     document.getElementById('remote-overlay-container').classList.remove('hidden');
     startVoiceAnalyzer(stream, document.getElementById('remote-waveform'));
+    
+    // Check initial track state
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack && (videoTrack.muted || !videoTrack.enabled)) {
+      document.getElementById('remote-video').parentElement.classList.add('remote-audio-only');
+    } else {
+      document.getElementById('remote-video').parentElement.classList.remove('remote-audio-only');
+    }
+  };
+
+  webrtc.onRemoteVideoMute = () => {
+    document.getElementById('remote-video').parentElement.classList.add('remote-audio-only');
+  };
+
+  webrtc.onRemoteVideoUnmute = () => {
+    document.getElementById('remote-video').parentElement.classList.remove('remote-audio-only');
   };
 
   try {
@@ -97,6 +111,11 @@ function setupSocketListeners() {
     if (myJoinCount > 1) window.playSound('rejoin');
     else window.playSound('join');
     
+    if (data.existingUser) {
+      document.getElementById('remote-label').textContent = data.existingUser.username;
+      document.getElementById('remote-overlay-label').textContent = data.existingUser.username;
+    }
+
     currentMode = data.mode;
     updateUIForMode(currentMode);
     if (data.videoUrl && data.videoUrl !== '') {
@@ -119,15 +138,18 @@ function setupSocketListeners() {
     }
     
     document.getElementById('remote-label').textContent = data.username;
+    document.getElementById('remote-overlay-label').textContent = data.username;
     showToast(`${data.username} joined`, 'success');
   });
 
   socket.on('user-left', (data) => {
     document.getElementById('remote-label').textContent = 'Waiting for friend...';
+    document.getElementById('remote-overlay-label').textContent = 'Friend';
     document.getElementById('remote-video').srcObject = null;
+    document.getElementById('remote-video').parentElement.classList.remove('remote-audio-only');
     document.getElementById('remote-waiting-layer').classList.remove('hidden');
     document.getElementById('remote-overlay-container').classList.add('hidden');
-    webrtc.destroy();
+    webrtc.resetConnection();
     webrtc.createPeerConnection(); 
     webrtc.addLocalStreamToPeer();
     showToast(`${data.username} left`, 'info');

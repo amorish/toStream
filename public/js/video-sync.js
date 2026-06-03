@@ -14,7 +14,7 @@ class VideoSyncManager {
     }
 
     this.isLocalAction = true;
-    this.syncThreshold = 2.0; 
+    this.syncThreshold = 0.5;
 
     this.setupListeners();
   }

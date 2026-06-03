@@ -110,7 +110,7 @@
         <h2 class="text-4xl font-extrabold text-on-background">Your Dashboard</h2>
         <p class="text-on-surface-variant mt-2">Manage your private streams</p>
       </div>
-      <button onclick="document.getElementById('create-modal').style.display='flex'" class="px-8 py-4 rounded-xl neo-button-primary font-bold inline-flex items-center gap-2">
+      <button onclick="openCreateModal()" class="px-8 py-4 rounded-xl neo-button-primary font-bold inline-flex items-center gap-2">
         <span class="material-symbols-outlined">add</span>
         New Room
       </button>
@@ -139,8 +139,8 @@
       
       <form id="create-form" class="space-y-5">
         <div>
-          <label class="block text-sm font-medium text-on-surface-variant mb-2">Room Name (optional)</label>
-          <input type="text" id="room-name" placeholder="Movie Night" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Room Name</label>
+          <input type="text" id="room-name" required placeholder="Movie Night" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
         </div>
         <div>
           <label class="block text-sm font-medium text-on-surface-variant mb-2">Default Mode</label>
@@ -154,10 +154,16 @@
           <label class="block text-sm font-medium text-on-surface-variant mb-2">Description (optional)</label>
           <textarea id="room-description" placeholder="What is this meeting about?" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1" rows="2"></textarea>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-on-surface-variant mb-2">Password (required)</label>
-          <input type="password" id="room-password" required placeholder="Set a secure password" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
-        </div>
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Room Code</label>
+          <div class="flex gap-2 md:gap-4 items-center">
+            <input type="hidden" id="room-password">
+            <div id="room-code-chars" class="flex gap-2 flex-1 justify-center">
+              <!-- Rendered via JS -->
+            </div>
+            <button type="button" onclick="copyRoomCode()" class="w-12 h-12 shrink-0 rounded-xl neo-button flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" title="Copy Room Code">
+              <span class="material-symbols-outlined text-xl">content_copy</span>
+            </button>
+          </div>
         <button type="submit" id="create-btn" class="w-full py-4 rounded-xl neo-button-primary font-bold mt-4">Create & Join</button>
       </form>
     </div>
@@ -172,12 +178,12 @@
       </button>
       
       <h3 class="text-2xl font-bold mb-2">Join Private Room</h3>
-      <p class="text-on-surface-variant text-sm mb-6">This room is password protected.</p>
+      <p class="text-on-surface-variant text-sm mb-6">Enter the room code to join.</p>
       
       <form id="join-form" class="space-y-5">
         <div>
-          <label class="block text-sm font-medium text-on-surface-variant mb-2">Password</label>
-          <input type="password" id="join-password" required class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
+          <label class="block text-sm font-medium text-on-surface-variant mb-2">Room Code</label>
+          <input type="text" id="join-password" required placeholder="e.g. A1B2C3" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1 uppercase font-mono tracking-widest font-bold">
         </div>
         <input type="hidden" id="join-room-id">
         <button type="submit" id="join-submit-btn" class="w-full py-4 rounded-xl neo-button-primary font-bold mt-4">Join Room</button>

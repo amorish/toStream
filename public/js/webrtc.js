@@ -31,13 +31,21 @@ class WebRTCManager {
       
       this.remoteStream.getTracks().forEach(track => {
         track.onunmute = () => {
-          if (window.playSound) window.playSound('micon');
+          if (window.playSound && track.kind === 'audio') window.playSound('micon');
+          if (track.kind === 'video' && this.onRemoteVideoUnmute) this.onRemoteVideoUnmute();
+        };
+        track.onmute = () => {
+          if (track.kind === 'video' && this.onRemoteVideoMute) this.onRemoteVideoMute();
         };
       });
 
       this.remoteStream.onaddtrack = (e) => {
         e.track.onunmute = () => {
-          if (window.playSound) window.playSound('micon');
+          if (window.playSound && e.track.kind === 'audio') window.playSound('micon');
+          if (e.track.kind === 'video' && this.onRemoteVideoUnmute) this.onRemoteVideoUnmute();
+        };
+        e.track.onmute = () => {
+          if (e.track.kind === 'video' && this.onRemoteVideoMute) this.onRemoteVideoMute();
         };
       };
 
@@ -207,6 +215,17 @@ class WebRTCManager {
 
   handleConnectionDropped() {
     showToast('Connection dropped. Attempting to recover...', 'warning');
+  }
+
+  resetConnection() {
+    if (this.peerConnection) {
+      this.peerConnection.close();
+      this.peerConnection = null;
+    }
+    this.remoteStream = null;
+    this.iceCandidateBuffer = [];
+    this.remoteDescSet = false;
+    this.currentVideoTrack = null;
   }
 
   destroy() {
