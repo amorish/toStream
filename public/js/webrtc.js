@@ -15,6 +15,7 @@ class WebRTCManager {
     this.onIceCandidateError = null;
     this.onScreenShareEnded = null;
     this.currentVideoTrack = null;
+    this.isNegotiating = false;
   }
 
   createPeerConnection() {
@@ -63,6 +64,10 @@ class WebRTCManager {
     this.peerConnection.onicecandidateerror = (event) => {
       console.warn('[WebRTC] ICE candidate error:', event.errorCode, event.errorText);
     };
+
+    this.peerConnection.onsignalingstatechange = () => {
+      this.isNegotiating = (this.peerConnection.signalingState !== 'stable');
+    };
   }
 
   async startLocalStream(constraints) {
@@ -94,24 +99,45 @@ class WebRTCManager {
   }
 
   async createOffer() {
-    const offer = await this.peerConnection.createOffer();
-    await this.peerConnection.setLocalDescription(offer);
-    this.socket.emit('offer', { roomId: this.roomId, offer });
+    if (this.isNegotiating) return;
+    this.isNegotiating = true;
+    try {
+      const offer = await this.peerConnection.createOffer();
+      await this.peerConnection.setLocalDescription(offer);
+      this.socket.emit('offer', { roomId: this.roomId, offer });
+    } catch (e) {
+      this.isNegotiating = false;
+    }
   }
 
   async handleOffer(offer) {
-    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    this.remoteDescSet = true;
-    await this.flushIceCandidateBuffer();
-    const answer = await this.peerConnection.createAnswer();
-    await this.peerConnection.setLocalDescription(answer);
-    this.socket.emit('answer', { roomId: this.roomId, answer });
+    try {
+      if (this.peerConnection.signalingState !== 'stable') {
+        await Promise.all([
+          this.peerConnection.setLocalDescription({type: 'rollback'}),
+          this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+        ]);
+      } else {
+        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      }
+      this.remoteDescSet = true;
+      await this.flushIceCandidateBuffer();
+      const answer = await this.peerConnection.createAnswer();
+      await this.peerConnection.setLocalDescription(answer);
+      this.socket.emit('answer', { roomId: this.roomId, answer });
+    } catch (e) {
+      console.warn('Error handling offer:', e);
+    }
   }
 
   async handleAnswer(answer) {
-    await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    this.remoteDescSet = true;
-    await this.flushIceCandidateBuffer();
+    try {
+      await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+      this.remoteDescSet = true;
+      await this.flushIceCandidateBuffer();
+    } catch (e) {
+      console.warn('Error handling answer:', e);
+    }
   }
 
   async addIceCandidate(candidate) {

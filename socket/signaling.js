@@ -76,7 +76,14 @@ module.exports = function initSignaling(io) {
            }
         }
         
-        socket.emit('room-joined', { roomId, participants: room.participants.length, mode: room.mode, videoUrl: room.videoUrl, existingUser });
+        socket.emit('room-joined', { 
+          roomId, 
+          participants: room.participants.length, 
+          mode: room.mode, 
+          videoUrl: room.videoUrl, 
+          videoState: room.videoState,
+          existingUser 
+        });
         
         socket.to(roomId).emit('user-joined', { userId: socket.user.id, username: socket.user.username });
 
@@ -134,6 +141,10 @@ module.exports = function initSignaling(io) {
       } catch (err) {}
     });
 
+    socket.on('media-state', ({ roomId, audio, video }) => {
+      socket.to(roomId).emit('media-state-changed', { userId: socket.user.id, audio, video });
+    });
+
     socket.on('leave-room', async ({ roomId }) => {
       await handleLeave(socket, roomId, io);
     });
@@ -152,12 +163,19 @@ async function handleLeave(socket, roomId, io) {
     socket.leave(roomId);
     const room = await Room.findOne({ roomId });
     if (room) {
-      room.participants = room.participants.filter(p => p.socketId !== socket.id && p.userId.toString() !== socket.user.id);
+      // Remove only this specific socket connection
+      room.participants = room.participants.filter(p => p.socketId !== socket.id);
+      
       if (room.participants.length === 0) {
         room.isActive = false;
       }
       await room.save();
-      socket.to(roomId).emit('user-left', { userId: socket.user.id, username: socket.user.username });
+      
+      // Check if this user still has another socket connection in the room (e.g. they refreshed and quickly rejoined)
+      const hasOtherConnection = room.participants.some(p => p.userId.toString() === socket.user.id);
+      if (!hasOtherConnection) {
+        socket.to(roomId).emit('user-left', { userId: socket.user.id, username: socket.user.username });
+      }
     }
   } catch (err) {
     console.error('Error in handleLeave:', err);

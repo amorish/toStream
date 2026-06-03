@@ -130,7 +130,7 @@ function setupSocketListeners() {
     updateUIForMode(currentMode);
     if (data.videoUrl && data.videoUrl !== '') {
       document.getElementById('video-url-input').value = data.videoUrl;
-      videoSync.changeVideo(data.videoUrl);
+      videoSync.syncLateJoiner(data.videoUrl, data.videoState);
     }
   });
 
@@ -138,6 +138,31 @@ function setupSocketListeners() {
     window.playSound('callcut');
     showToast(data.message, 'error');
     setTimeout(() => window.location.href = '/dashboard.html', 2000);
+  });
+
+  socket.on('media-state-changed', (data) => {
+    const remoteContainer = document.getElementById('remote-video').parentElement;
+    
+    // Handle audio mute indicator
+    let muteIcon = document.getElementById('remote-mute-icon');
+    if (data.audio) {
+      if (!muteIcon) {
+        muteIcon = document.createElement('div');
+        muteIcon.id = 'remote-mute-icon';
+        muteIcon.className = 'absolute top-4 right-4 bg-error/90 text-white p-2 rounded-full flex items-center justify-center z-20 backdrop-blur-sm';
+        muteIcon.innerHTML = '<span class="material-symbols-outlined text-sm">mic_off</span>';
+        remoteContainer.appendChild(muteIcon);
+      }
+    } else {
+      if (muteIcon) muteIcon.remove();
+    }
+    
+    // Handle camera off indicator
+    if (data.video) {
+      remoteContainer.classList.add('opacity-50', 'grayscale');
+    } else {
+      remoteContainer.classList.remove('opacity-50', 'grayscale');
+    }
   });
 
   socket.on('user-joined', (data) => {
@@ -255,6 +280,9 @@ function setupUIListeners() {
 
   document.getElementById('toggle-mic').addEventListener('click', (e) => {
     const isMuted = webrtc.toggleMute();
+    
+    socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
+    
     if (!isMuted) window.playSound('micon');
     else window.playSound('tap');
     
@@ -270,13 +298,20 @@ function setupUIListeners() {
     }
   });
 
+  let isCameraToggling = false;
   document.getElementById('toggle-cam').addEventListener('click', async (e) => {
+    if (isCameraToggling) return;
+    isCameraToggling = true;
+    
     const btn = e.currentTarget;
     // visual feedback while waiting
     btn.style.opacity = '0.5';
     
     const isOff = await webrtc.toggleCamera();
     btn.style.opacity = '1';
+    isCameraToggling = false;
+    
+    socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
     
     if (!isOff) window.playSound('micon');
     else window.playSound('tap');

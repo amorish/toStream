@@ -91,6 +91,23 @@ class VideoSyncManager {
     });
   }
 
+  syncLateJoiner(videoUrl, videoState) {
+    this._setSource(videoUrl);
+    this.player.once('ready', () => {
+      this.isLocalAction = false;
+      if (videoState && videoState.playing) {
+        const timeSinceUpdate = (Date.now() - new Date(videoState.lastUpdated).getTime()) / 1000;
+        this.player.currentTime = videoState.currentTime + timeSinceUpdate;
+        this.player.play().catch(e => console.warn('Auto-play prevented for late joiner'));
+      } else if (videoState) {
+        this.player.currentTime = videoState.currentTime;
+      } else {
+        this.player.play().catch(e => console.warn('Auto-play prevented for late joiner'));
+      }
+      setTimeout(() => { this.isLocalAction = true; }, 100);
+    });
+  }
+
   _setSource(url) {
     const placeholder = document.getElementById('video-placeholder');
     if (placeholder) placeholder.classList.add('hidden');
