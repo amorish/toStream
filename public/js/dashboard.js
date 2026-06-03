@@ -213,7 +213,8 @@ document.getElementById('settings-form').addEventListener('submit', async functi
 });
 
 window.deleteAccount = async function() {
-  if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+  const userInput = prompt("Type 'delete' to confirm account deletion. This action cannot be undone.");
+  if (userInput && userInput.toLowerCase() === 'delete') {
     try {
       const data = await apiFetch('/api/auth/delete', { method: 'DELETE' });
       if (data && data.success) {
@@ -225,6 +226,8 @@ window.deleteAccount = async function() {
     } catch (err) {
       showToast('Error deleting account', 'error');
     }
+  } else if (userInput !== null) {
+    showToast('Account deletion cancelled. You must type exactly "delete".', 'warning');
   }
 };
 
