@@ -51,6 +51,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (err) {}
 
+  document.getElementById('join-room-btn').addEventListener('click', async () => {
+    document.getElementById('join-overlay').classList.add('hidden');
+    document.getElementById('main-room-content').classList.remove('hidden');
+    window.playSound('tap');
+    await joinRoom();
+  });
+
+  // Ping the server every 5 minutes to keep Render free instance awake
+  setInterval(() => {
+    fetch('/api/ping').catch(() => {});
+  }, 5 * 60 * 1000);
+});
+
+async function joinRoom() {
   webrtc = new WebRTCManager(socket, roomId);
   
   webrtc.onRemoteStream = (stream) => {
@@ -94,12 +108,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   connectSocket();
   setupSocketListeners();
   setupUIListeners();
+}
 
-  // Ping the server every 5 minutes to keep Render free instance awake
-  setInterval(() => {
-    fetch('/api/ping').catch(() => {});
-  }, 5 * 60 * 1000);
-});
 
 function setupSocketListeners() {
   socket.on('connect', () => {
