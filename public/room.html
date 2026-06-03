@@ -160,9 +160,56 @@
     }
     
     @media (max-width: 768px) { 
-      .pip-mode .video-grid { flex-direction: row; gap: 8px; top: 70px; left: 16px; bottom: auto; right: auto; } 
-      .pip-mode .video-wrapper { height: 80px; } 
-      .pip-mode .video-wrapper > div.absolute { bottom: 6px; left: 6px; padding: 2px 6px; }
+      .pip-mode .video-grid { 
+        flex-direction: row; 
+        gap: 12px; 
+        top: auto; 
+        bottom: 16px; 
+        left: 16px; 
+        right: 16px; 
+        width: auto;
+        justify-content: center;
+      } 
+      .pip-mode .video-wrapper { 
+        height: 120px; 
+        flex: 1;
+        max-width: 50%;
+      } 
+      .pip-mode .video-wrapper > div.absolute { 
+        bottom: 6px !important; 
+        left: 6px !important; 
+        padding: 2px 6px; 
+      }
+      
+      /* Mobile PiP: audio-only should remain full-size boxes */
+      .pip-mode .video-wrapper.local-audio-only,
+      .pip-mode .video-wrapper.remote-audio-only {
+        position: relative !important;
+        top: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+        height: 120px !important;
+        width: auto !important;
+        background: #000 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+      }
+      .pip-mode .video-wrapper.local-audio-only::before {
+        content: "videocam_off";
+        font-family: 'Material Symbols Outlined';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 32px;
+        color: rgba(255,255,255,0.5);
+      }
+      .pip-mode .video-wrapper.remote-audio-only #remote-waiting-layer {
+        display: flex !important;
+      }
+
+      /* Non-PiP audio capsules */
       .video-wrapper.remote-audio-only { bottom: 16px; right: 16px; }
       .video-wrapper.local-audio-only { bottom: 16px; left: 16px; }
     }
