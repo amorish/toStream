@@ -259,6 +259,30 @@
     </div>
   </div>
 
+  <div id="delete-account-modal" class="modal">
+    <div class="neo-extruded rounded-[2rem] p-10 w-full max-w-md mx-4 relative">
+      <button type="button" class="absolute top-6 right-6 w-10 h-10 rounded-full neo-button flex justify-center items-center text-on-surface-variant hover:text-error transition-colors" 
+              onclick="document.getElementById('delete-account-modal').style.display='none'">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+      
+      <h3 class="text-2xl font-bold mb-4 text-error flex items-center gap-2">
+        <span class="material-symbols-outlined">warning</span> Delete Account
+      </h3>
+      <p class="text-on-surface-variant text-sm mb-6">Type <strong class="text-error font-mono">'delete'</strong> to confirm account deletion. This action cannot be undone.</p>
+      
+      <form id="delete-account-form" class="space-y-5">
+        <div>
+          <input type="text" id="delete-confirm-input" required placeholder="Type 'delete'" autocomplete="off" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1 focus:ring-error border border-transparent focus:border-error text-on-surface">
+        </div>
+        <div class="flex gap-4 mt-6">
+          <button type="button" onclick="document.getElementById('delete-account-modal').style.display='none'" class="flex-1 py-4 rounded-xl neo-button font-bold text-on-surface-variant">Cancel</button>
+          <button type="submit" id="delete-confirm-btn" class="flex-1 py-4 rounded-xl neo-button-primary bg-error text-white font-bold pointer-events-none opacity-50 transition-all hover:bg-red-600">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/config.js"></script>
   <script src="/js/utils.js"></script>
   

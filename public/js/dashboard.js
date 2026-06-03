@@ -212,24 +212,54 @@ document.getElementById('settings-form').addEventListener('submit', async functi
   }
 });
 
-window.deleteAccount = async function() {
-  const userInput = prompt("Type 'delete' to confirm account deletion. This action cannot be undone.");
-  if (userInput && userInput.toLowerCase() === 'delete') {
-    try {
-      const data = await apiFetch('/api/auth/delete', { method: 'DELETE' });
-      if (data && data.success) {
-        removeToken();
-        window.location.href = '/index.html';
-      } else {
-        showToast(data?.message || 'Failed to delete account', 'error');
-      }
-    } catch (err) {
-      showToast('Error deleting account', 'error');
-    }
-  } else if (userInput !== null) {
-    showToast('Account deletion cancelled. You must type exactly "delete".', 'warning');
+window.deleteAccount = function() {
+  document.getElementById('delete-account-modal').style.display = 'flex';
+  const input = document.getElementById('delete-confirm-input');
+  const btn = document.getElementById('delete-confirm-btn');
+  if(input) {
+    input.value = '';
+    input.focus();
+  }
+  if(btn) {
+    btn.classList.add('opacity-50', 'pointer-events-none');
   }
 };
+
+document.getElementById('delete-confirm-input')?.addEventListener('input', (e) => {
+  const btn = document.getElementById('delete-confirm-btn');
+  if (!btn) return;
+  if (e.target.value.toLowerCase() === 'delete') {
+    btn.classList.remove('opacity-50', 'pointer-events-none');
+  } else {
+    btn.classList.add('opacity-50', 'pointer-events-none');
+  }
+});
+
+document.getElementById('delete-account-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('delete-confirm-input');
+  if (input.value.toLowerCase() !== 'delete') return;
+
+  const btn = document.getElementById('delete-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Deleting...';
+
+  try {
+    const data = await apiFetch('/api/auth/delete', { method: 'DELETE' });
+    if (data && data.success) {
+      removeToken();
+      window.location.href = '/index.html';
+    } else {
+      showToast(data?.message || 'Failed to delete account', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Delete';
+    }
+  } catch (err) {
+    showToast('Error deleting account', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+  }
+});
 
 // Custom Select Dropdown Logic
 document.addEventListener('DOMContentLoaded', () => {
