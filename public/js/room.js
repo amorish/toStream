@@ -13,7 +13,7 @@ window.sounds = {
   back: new Audio('/audio/back.mp3'),
   callcut: new Audio('/audio/callcut.wav'),
   micon: new Audio('/audio/micon.mp3'),
-  tap: new Audio('/audio/tap.mp3')
+  click: new Audio('/audio/click.mp3')
 };
 
 window.playSound = function(name) {
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('join-room-btn').addEventListener('click', async () => {
     document.getElementById('join-overlay').classList.add('hidden');
     document.getElementById('main-room-content').classList.remove('hidden');
-    window.playSound('tap');
+    window.playSound('click');
     await joinRoom();
   });
 
@@ -265,7 +265,7 @@ function setupUIListeners() {
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', () => {
-      window.playSound('tap');
+      window.playSound('click');
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {
           showToast('Fullscreen not supported', 'warning');
@@ -284,7 +284,7 @@ function setupUIListeners() {
     socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
     
     if (!isMuted) window.playSound('micon');
-    else window.playSound('tap');
+    else window.playSound('click');
     
     const btn = e.currentTarget;
     if (isMuted) {
@@ -314,7 +314,7 @@ function setupUIListeners() {
     socket.emit('media-state', { roomId, audio: webrtc.isMuted, video: webrtc.isCameraOff });
     
     if (!isOff) window.playSound('micon');
-    else window.playSound('tap');
+    else window.playSound('click');
     
     if (isOff) {
       btn.classList.remove('neo-button', 'hover:text-primary');
@@ -336,7 +336,7 @@ function setupUIListeners() {
   };
 
   document.getElementById('share-screen').addEventListener('click', async (e) => {
-    window.playSound('tap');
+    window.playSound('click');
     const btn = e.currentTarget;
     const isSharing = btn.classList.contains('neo-pressed');
     
@@ -358,7 +358,7 @@ function setupUIListeners() {
 
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      window.playSound('tap');
+      window.playSound('click');
       const mode = btn.dataset.mode;
       socket.emit('mode-change', { roomId, mode });
       currentMode = mode;
@@ -367,7 +367,7 @@ function setupUIListeners() {
   });
 
   document.getElementById('load-video-btn').addEventListener('click', () => {
-    window.playSound('tap');
+    window.playSound('click');
     const url = document.getElementById('video-url-input').value;
     if (url) videoSync.changeVideo(url);
   });
