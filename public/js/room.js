@@ -159,9 +159,9 @@ function setupSocketListeners() {
     
     // Handle camera off indicator
     if (data.video) {
-      remoteContainer.classList.add('opacity-50', 'grayscale');
+      remoteContainer.classList.add('opacity-50');
     } else {
-      remoteContainer.classList.remove('opacity-50', 'grayscale');
+      remoteContainer.classList.remove('opacity-50');
     }
   });
 
@@ -278,6 +278,33 @@ function setupUIListeners() {
     });
   }
 
+  const remoteFullscreenBtn = document.getElementById('remote-fullscreen-btn');
+  if (remoteFullscreenBtn) {
+    remoteFullscreenBtn.addEventListener('click', () => {
+      const remoteWrapper = document.getElementById('remote-video').parentElement;
+      if (!document.fullscreenElement) {
+        if (remoteWrapper.requestFullscreen) {
+          remoteWrapper.requestFullscreen();
+        } else if (document.getElementById('remote-video').webkitEnterFullscreen) {
+          document.getElementById('remote-video').webkitEnterFullscreen();
+        }
+        remoteFullscreenBtn.querySelector('span').textContent = 'fullscreen_exit';
+      } else {
+        document.exitFullscreen();
+        remoteFullscreenBtn.querySelector('span').textContent = 'fullscreen';
+      }
+    });
+  }
+
+  document.addEventListener('fullscreenchange', () => {
+    if (remoteFullscreenBtn && !document.fullscreenElement) {
+      remoteFullscreenBtn.querySelector('span').textContent = 'fullscreen';
+    }
+    if (fullscreenBtn && !document.fullscreenElement) {
+      fullscreenBtn.querySelector('span').textContent = 'fullscreen';
+    }
+  });
+
   document.getElementById('toggle-mic').addEventListener('click', (e) => {
     const isMuted = webrtc.toggleMute();
     
@@ -335,26 +362,31 @@ function setupUIListeners() {
     document.getElementById('local-video').srcObject = webrtc.localStream;
   };
 
-  document.getElementById('share-screen').addEventListener('click', async (e) => {
-    window.playSound('click');
-    const btn = e.currentTarget;
-    const isSharing = btn.classList.contains('neo-pressed');
-    
-    if (isSharing) {
-      await webrtc.stopScreenShare();
-      webrtc.onScreenShareEnded();
-    } else {
-      try {
-        const screenStream = await webrtc.startScreenShare();
-        document.getElementById('local-video').srcObject = screenStream;
-        btn.classList.remove('neo-button', 'hover:text-primary');
-        btn.classList.add('neo-pressed', 'text-success', 'hover:text-green-400');
-        btn.querySelector('span').textContent = 'stop_screen_share';
-      } catch (err) {
-        if (err.message !== 'SCREEN_SHARE_DENIED') showToast('Screen share failed', 'error');
+  const shareBtn = document.getElementById('share-screen');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    shareBtn.style.display = 'none';
+  } else {
+    shareBtn.addEventListener('click', async (e) => {
+      window.playSound('click');
+      const btn = e.currentTarget;
+      const isSharing = btn.classList.contains('neo-pressed');
+      
+      if (isSharing) {
+        await webrtc.stopScreenShare();
+        webrtc.onScreenShareEnded();
+      } else {
+        try {
+          const screenStream = await webrtc.startScreenShare();
+          document.getElementById('local-video').srcObject = screenStream;
+          btn.classList.remove('neo-button', 'hover:text-primary');
+          btn.classList.add('neo-pressed', 'text-success', 'hover:text-green-400');
+          btn.querySelector('span').textContent = 'stop_screen_share';
+        } catch (err) {
+          if (err.message !== 'SCREEN_SHARE_DENIED') showToast('Screen share failed', 'error');
+        }
       }
-    }
-  });
+    });
+  }
 
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
