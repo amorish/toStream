@@ -7,19 +7,36 @@ let musicMixer;
 let currentMode = 'camera';
 let isCreator = false;
 
-window.sounds = {
-  join: new Audio('/audio/joined.wav'),
-  rejoin: new Audio('/audio/cameback.wav'),
-  back: new Audio('/audio/back.mp3'),
-  callcut: new Audio('/audio/callcut.wav'),
-  micon: new Audio('/audio/micon.mp3'),
-  click: new Audio('/audio/click.mp3')
+window.sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+window.audioBuffers = {};
+
+const audioFiles = {
+  join: '/audio/joined.wav',
+  rejoin: '/audio/cameback.wav',
+  back: '/audio/back.mp3',
+  callcut: '/audio/callcut.wav',
+  micon: '/audio/micon.mp3',
+  click: '/audio/click.mp3'
 };
 
+Object.entries(audioFiles).forEach(([name, url]) => {
+  fetch(url)
+    .then(res => res.arrayBuffer())
+    .then(data => window.sharedAudioContext.decodeAudioData(data))
+    .then(buffer => { window.audioBuffers[name] = buffer; })
+    .catch(e => console.warn('Failed to load audio:', name, e));
+});
+
 window.playSound = function(name) {
-  if (window.sounds[name]) {
-    window.sounds[name].currentTime = 0;
-    window.sounds[name].play().catch(e => console.warn('Audio play failed:', e));
+  if (window.sharedAudioContext.state === 'suspended') {
+    window.sharedAudioContext.resume().catch(() => {});
+  }
+  const buffer = window.audioBuffers[name];
+  if (buffer) {
+    const source = window.sharedAudioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(window.sharedAudioContext.destination);
+    source.start(0);
   }
 };
 
@@ -489,29 +506,23 @@ window.addEventListener('beforeunload', () => {
   disconnectSocket();
 });
 
-let sharedAudioContext = null;
-
 function startVoiceAnalyzer(stream, waveformElement) {
   if (!stream.getAudioTracks().length) return;
   
-  if (!sharedAudioContext) {
-    sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  
   try {
     // Safari/some browsers need the track to be played first or MediaStreamSource might fail if stream is inactive.
-    const analyser = sharedAudioContext.createAnalyser();
+    const analyser = window.sharedAudioContext.createAnalyser();
     analyser.fftSize = 256;
     analyser.smoothingTimeConstant = 0.5;
     
     // Create source from the stream
-    const source = sharedAudioContext.createMediaStreamSource(stream);
+    const source = window.sharedAudioContext.createMediaStreamSource(stream);
     source.connect(analyser);
 
     // Auto-resume audio context on user interaction if suspended
-    if (sharedAudioContext.state === 'suspended') {
+    if (window.sharedAudioContext.state === 'suspended') {
       const resumeAudio = () => {
-        sharedAudioContext.resume();
+        window.sharedAudioContext.resume();
         document.removeEventListener('click', resumeAudio);
         document.removeEventListener('touchstart', resumeAudio);
       };
