@@ -147,6 +147,18 @@
       margin: 0 !important;
     }
     
+    /* PiP Audio-Only Overrides */
+    .pip-mode .video-wrapper.local-audio-only {
+      top: calc(100% + 12px) !important;
+      bottom: auto !important;
+      left: 0 !important;
+    }
+    .pip-mode .video-wrapper.remote-audio-only {
+      top: calc(100% + 12px) !important;
+      bottom: auto !important;
+      right: 0 !important;
+    }
+    
     @media (max-width: 768px) { 
       .pip-mode .video-grid { flex-direction: row; gap: 8px; top: 70px; left: 16px; bottom: auto; right: auto; } 
       .pip-mode .video-wrapper { height: 80px; } 
