@@ -99,6 +99,9 @@
       </div>
       <div class="flex items-center gap-6">
         <span id="welcome-text" class="text-on-surface-variant font-medium hidden md:block"></span>
+        <button onclick="openSettingsModal()" class="w-10 h-10 rounded-xl neo-button flex justify-center items-center text-on-surface-variant hover:text-primary transition-colors" title="Settings">
+          <span class="material-symbols-outlined text-lg">settings</span>
+        </button>
         <button id="logout-btn" class="px-6 py-2 rounded-xl neo-button text-on-surface font-medium transition-all text-sm">Logout</button>
       </div>
     </div>
@@ -142,13 +145,27 @@
           <label class="block text-sm font-medium text-on-surface-variant mb-2">Room Name</label>
           <input type="text" id="room-name" required placeholder="Movie Night" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
         </div>
-        <div>
+        <div class="relative custom-select-container">
           <label class="block text-sm font-medium text-on-surface-variant mb-2">Default Mode</label>
-          <select id="room-mode" class="w-full px-4 py-3 rounded-xl neo-pressed focus:outline-none focus:ring-1">
-            <option value="camera">Camera & Voice</option>
-            <option value="url-video">Watch Video</option>
-            <option value="music">Listen to Music</option>
-          </select>
+          <input type="hidden" id="room-mode" value="camera">
+          <div id="custom-select-trigger" class="w-full px-4 py-3 rounded-xl neo-pressed flex justify-between items-center cursor-pointer select-none">
+            <span id="custom-select-text">Camera & Voice</span>
+            <span class="material-symbols-outlined text-on-surface-variant transition-transform duration-300" id="custom-select-arrow">expand_more</span>
+          </div>
+          <div id="custom-select-dropdown" class="absolute w-full mt-2 bg-surface-container-high neo-extruded rounded-xl overflow-hidden z-[60] hidden opacity-0 transition-opacity duration-200 shadow-2xl border border-white/10 origin-top scale-95 transform transition-all">
+            <div class="custom-option px-4 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-3 transition-colors text-primary font-bold bg-white/5" data-value="camera">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">videocam</span>
+              Camera & Voice
+            </div>
+            <div class="custom-option px-4 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-3 transition-colors text-on-surface-variant" data-value="url-video">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">smart_display</span>
+              Watch Video
+            </div>
+            <div class="custom-option px-4 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-3 transition-colors text-on-surface-variant" data-value="music">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">headphones</span>
+              Listen to Music
+            </div>
+          </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-on-surface-variant mb-2">Description (optional)</label>
@@ -187,6 +204,57 @@
         </div>
         <input type="hidden" id="join-room-id">
         <button type="submit" id="join-submit-btn" class="w-full py-4 rounded-xl neo-button-primary font-bold mt-4">Join Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal">
+    <div class="neo-extruded rounded-[2rem] p-10 w-full max-w-md mx-4 relative">
+      <button type="button" class="absolute top-6 right-6 w-10 h-10 rounded-full neo-button flex justify-center items-center text-on-surface-variant hover:text-error transition-colors" 
+              onclick="document.getElementById('settings-modal').style.display='none'">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+      
+      <h3 class="text-2xl font-bold mb-6">Settings</h3>
+      
+      <form id="settings-form" class="space-y-6">
+        
+        <!-- Auto Delete History -->
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="block text-sm font-bold text-on-background">Auto-delete History</label>
+            <p class="text-xs text-on-surface-variant mt-1 max-w-[200px]">Automatically remove older rooms from your history list.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="setting-auto-delete" class="sr-only peer">
+            <div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+
+        <!-- Max History Length -->
+        <div id="max-history-container" class="opacity-50 pointer-events-none transition-opacity">
+          <label class="block text-sm font-bold text-on-background mb-2">Max History Length</label>
+          <div class="flex items-center gap-4">
+            <input type="range" id="setting-max-history" min="5" max="50" step="5" value="20" class="flex-1 accent-primary">
+            <span id="max-history-val" class="font-mono text-primary font-bold">20</span>
+          </div>
+        </div>
+
+        <hr class="border-white/10 my-6">
+
+        <!-- Danger Zone -->
+        <div>
+          <h4 class="text-error font-bold mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">warning</span> Danger Zone
+          </h4>
+          <p class="text-xs text-on-surface-variant mb-4">Once you delete your account, there is no going back. Please be certain.</p>
+          <button type="button" onclick="deleteAccount()" class="w-full py-3 rounded-xl border border-error/50 text-error font-bold hover:bg-error/10 transition-colors">
+            Delete Account
+          </button>
+        </div>
+
+        <button type="submit" id="save-settings-btn" class="w-full py-4 rounded-xl neo-button-primary font-bold mt-4">Save Settings</button>
       </form>
     </div>
   </div>

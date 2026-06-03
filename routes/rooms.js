@@ -47,7 +47,14 @@ router.post('/create', roomCreateLimiter, createRoomRules, validate, async (req,
 
     const room = await Room.create(roomData);
 
-    await User.findByIdAndUpdate(req.user._id, { $addToSet: { roomHistory: roomId } });
+    const userRecord = await User.findById(req.user._id);
+    if (!userRecord.roomHistory.includes(roomId)) {
+      userRecord.roomHistory.unshift(roomId);
+      if (userRecord.settings.autoDeleteHistory && userRecord.roomHistory.length > userRecord.settings.maxHistoryLength) {
+        userRecord.roomHistory = userRecord.roomHistory.slice(0, userRecord.settings.maxHistoryLength);
+      }
+      await userRecord.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -109,7 +116,14 @@ router.post('/join', joinRoomRules, validate, async (req, res) => {
     room.participants.push({ userId: req.user._id });
     await room.save();
 
-    await User.findByIdAndUpdate(req.user._id, { $addToSet: { roomHistory: roomId } });
+    const userRecord = await User.findById(req.user._id);
+    if (!userRecord.roomHistory.includes(roomId)) {
+      userRecord.roomHistory.unshift(roomId);
+      if (userRecord.settings.autoDeleteHistory && userRecord.roomHistory.length > userRecord.settings.maxHistoryLength) {
+        userRecord.roomHistory = userRecord.roomHistory.slice(0, userRecord.settings.maxHistoryLength);
+      }
+      await userRecord.save();
+    }
 
     res.status(200).json({
       success: true,

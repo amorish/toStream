@@ -94,4 +94,61 @@ router.post('/logout', (req, res) => {
   res.status(200).json({ success: true, message: 'Logged out successfully.' });
 });
 
+router.get('/settings', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(200).json({ success: true, settings: user.settings });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+router.put('/settings', protect, async (req, res) => {
+  try {
+    const { autoDeleteHistory, maxHistoryLength } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (autoDeleteHistory !== undefined) user.settings.autoDeleteHistory = autoDeleteHistory;
+    if (maxHistoryLength !== undefined) {
+      const len = parseInt(maxHistoryLength, 10);
+      if (len >= 1 && len <= 100) {
+        user.settings.maxHistoryLength = len;
+      }
+    }
+    
+    // Clean up history immediately if enabled and over limit
+    if (user.settings.autoDeleteHistory && user.roomHistory.length > user.settings.maxHistoryLength) {
+      user.roomHistory = user.roomHistory.slice(0, user.settings.maxHistoryLength);
+    }
+    
+    await user.save();
+    res.status(200).json({ success: true, settings: user.settings });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+router.delete('/delete', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Mark all their created rooms as inactive
+    const Room = require('../models/Room');
+    await Room.updateMany({ createdBy: user._id }, { isActive: false });
+
+    // Delete the user completely
+    await User.findByIdAndDelete(user._id);
+
+    res.status(200).json({ success: true, message: 'Account deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error deleting account' });
+  }
+});
+
 module.exports = router;

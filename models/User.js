@@ -37,6 +37,10 @@ const UserSchema = new mongoose.Schema({
   roomHistory: {
     type: [String],
     default: []
+  },
+  settings: {
+    autoDeleteHistory: { type: Boolean, default: false },
+    maxHistoryLength: { type: Number, default: 20 }
   }
 });
 

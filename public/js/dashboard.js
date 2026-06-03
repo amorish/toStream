@@ -152,3 +152,144 @@ window.copyRoomCode = function() {
     showToast('Room Code copied!', 'success');
   }
 };
+
+window.openSettingsModal = async function() {
+  document.getElementById('settings-modal').style.display = 'flex';
+  try {
+    const data = await apiFetch('/api/auth/settings');
+    if (data && data.success && data.settings) {
+      document.getElementById('setting-auto-delete').checked = data.settings.autoDeleteHistory;
+      document.getElementById('setting-max-history').value = data.settings.maxHistoryLength;
+      document.getElementById('max-history-val').textContent = data.settings.maxHistoryLength;
+      
+      const maxHistoryContainer = document.getElementById('max-history-container');
+      if (data.settings.autoDeleteHistory) {
+        maxHistoryContainer.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        maxHistoryContainer.classList.add('opacity-50', 'pointer-events-none');
+      }
+    }
+  } catch (err) {
+    showToast('Failed to load settings', 'error');
+  }
+};
+
+document.getElementById('setting-auto-delete').addEventListener('change', function(e) {
+  const maxHistoryContainer = document.getElementById('max-history-container');
+  if (e.target.checked) {
+    maxHistoryContainer.classList.remove('opacity-50', 'pointer-events-none');
+  } else {
+    maxHistoryContainer.classList.add('opacity-50', 'pointer-events-none');
+  }
+});
+
+document.getElementById('setting-max-history').addEventListener('input', function(e) {
+  document.getElementById('max-history-val').textContent = e.target.value;
+});
+
+document.getElementById('settings-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('save-settings-btn');
+  const autoDeleteHistory = document.getElementById('setting-auto-delete').checked;
+  const maxHistoryLength = parseInt(document.getElementById('setting-max-history').value, 10);
+  
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  
+  const data = await apiFetch('/api/auth/settings', {
+    method: 'PUT',
+    body: JSON.stringify({ autoDeleteHistory, maxHistoryLength })
+  });
+  
+  btn.disabled = false;
+  btn.textContent = 'Save Settings';
+  
+  if (data && data.success) {
+    showToast('Settings saved successfully', 'success');
+    document.getElementById('settings-modal').style.display = 'none';
+  } else {
+    showToast(data?.message || 'Failed to save settings', 'error');
+  }
+});
+
+window.deleteAccount = async function() {
+  if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
+    try {
+      const data = await apiFetch('/api/auth/delete', { method: 'DELETE' });
+      if (data && data.success) {
+        removeToken();
+        window.location.href = '/index.html';
+      } else {
+        showToast(data?.message || 'Failed to delete account', 'error');
+      }
+    } catch (err) {
+      showToast('Error deleting account', 'error');
+    }
+  }
+};
+
+// Custom Select Dropdown Logic
+document.addEventListener('DOMContentLoaded', () => {
+  const selectTrigger = document.getElementById('custom-select-trigger');
+  const selectDropdown = document.getElementById('custom-select-dropdown');
+  const selectArrow = document.getElementById('custom-select-arrow');
+  const selectText = document.getElementById('custom-select-text');
+  const hiddenInput = document.getElementById('room-mode');
+  const options = document.querySelectorAll('.custom-option');
+
+  if (selectTrigger) {
+    selectTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = selectDropdown.classList.contains('hidden');
+      if (isHidden) {
+        selectDropdown.classList.remove('hidden');
+        // trigger animation slightly after display block
+        setTimeout(() => {
+          selectDropdown.classList.remove('opacity-0', 'scale-95');
+          selectDropdown.classList.add('opacity-100', 'scale-100');
+        }, 10);
+        selectArrow.style.transform = 'rotate(180deg)';
+      } else {
+        closeCustomSelect();
+      }
+    });
+  }
+
+  options.forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const value = option.getAttribute('data-value');
+      const text = option.innerText.trim();
+      
+      hiddenInput.value = value;
+      selectText.textContent = text;
+      
+      // Update styling
+      options.forEach(opt => {
+        opt.classList.remove('text-primary', 'font-bold', 'bg-white/5');
+        opt.classList.add('text-on-surface-variant');
+      });
+      option.classList.remove('text-on-surface-variant');
+      option.classList.add('text-primary', 'font-bold', 'bg-white/5');
+      
+      closeCustomSelect();
+    });
+  });
+
+  function closeCustomSelect() {
+    if (selectDropdown && !selectDropdown.classList.contains('hidden')) {
+      selectDropdown.classList.remove('opacity-100', 'scale-100');
+      selectDropdown.classList.add('opacity-0', 'scale-95');
+      selectArrow.style.transform = 'rotate(0deg)';
+      setTimeout(() => {
+        selectDropdown.classList.add('hidden');
+      }, 200);
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    if (selectTrigger && !selectTrigger.contains(e.target) && !selectDropdown.contains(e.target)) {
+      closeCustomSelect();
+    }
+  });
+});
