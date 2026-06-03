@@ -163,6 +163,9 @@
         z-index: 9999 !important;
         overflow: hidden !important;
       }
+      .mobile-rotated .video-grid {
+        flex-direction: row !important;
+      }
     }
   </style>
 <link rel="icon" href="/img/orglogo.webp" type="image/webp">
@@ -226,7 +229,7 @@
       
       <!-- Camera Mode -->
       <div id="camera-view" class="view-layer active p-4 md:p-6">
-        <div class="video-grid flex flex-row w-full h-full gap-4 md:gap-6">
+        <div class="video-grid flex flex-col md:flex-row w-full h-full gap-4 md:gap-6">
           
           <div class="video-wrapper flex-1 relative bg-black neo-extruded rounded-[2rem] overflow-hidden">
             <video id="local-video" class="w-full h-full object-cover" autoplay muted playsinline></video>
