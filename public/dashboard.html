@@ -93,7 +93,7 @@
     <div class="neo-extruded rounded-2xl px-4 md:px-8 py-3 flex flex-row justify-between items-center bg-background/80 backdrop-blur-xl gap-4 md:gap-0">
       <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='/'">
         <img src="/img/orglogo.webp?v=2" alt="toStream Logo" class="h-14 scale-110 w-auto object-contain">
-        <span class="text-2xl font-extrabold tracking-tight leading-none">
+        <span class="text-2xl font-extrabold tracking-tight leading-none -translate-y-1.5">
           <span class="text-primary">to</span><span class="text-black dark:text-white">Stream</span>
         </span>
       </div>
@@ -277,7 +277,7 @@
           list.innerHTML = data.rooms.map(room => {
             const isExpired = room.isExpired || !room.isActive;
             return `
-            <div class="neo-extruded p-6 rounded-2xl flex flex-col justify-between transition-all ${isExpired ? 'opacity-50' : 'hover:-translate-y-1 hover:border-primary/30'}">
+            <div class="neo-extruded p-6 rounded-2xl flex flex-col justify-between transition-all ${isExpired ? 'opacity-50' : 'hover:-translate-y-1.5 hover:border-primary/30'}">
               <div>
                 <h4 class="text-xl font-bold text-on-background mb-2">${escapeHtml(room.name || 'Unnamed Room')}</h4>
                 <p class="font-mono text-sm text-primary mb-2">${room.roomId}</p>
