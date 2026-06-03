@@ -446,3 +446,11 @@ function startVoiceAnalyzer(stream, waveformElement) {
     console.warn('Audio analyzer failed to start:', err);
   }
 }
+
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    // If the page is restored from bfcache, it's safer to reload it entirely
+    // since WebRTC connections and WebSockets were torn down on beforeunload.
+    window.location.reload();
+  }
+});

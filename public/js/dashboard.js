@@ -296,3 +296,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    if (typeof loadHistory === 'function') {
+      loadHistory();
+    }
+  }
+});
