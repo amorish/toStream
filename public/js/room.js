@@ -113,6 +113,9 @@ async function joinRoom() {
     micBtn.classList.remove('neo-button', 'hover:text-primary');
     micBtn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
     micBtn.querySelector('span').textContent = 'mic_off';
+    
+    const localWrapper = document.getElementById('local-video').parentElement;
+    localWrapper.classList.add('local-audio-only');
   }
 
   videoSync = new VideoSyncManager(socket, roomId, document.getElementById('sync-video'));
@@ -373,10 +376,12 @@ function setupUIListeners() {
         btn.classList.remove('neo-button', 'hover:text-primary');
         btn.classList.add('neo-pressed', 'text-error', 'hover:text-red-400');
         btn.querySelector('span').textContent = 'videocam_off';
+        document.getElementById('local-video').parentElement.classList.add('local-audio-only');
       } else {
         btn.classList.add('neo-button', 'hover:text-primary');
         btn.classList.remove('neo-pressed', 'text-error', 'hover:text-red-400');
         btn.querySelector('span').textContent = 'videocam';
+        document.getElementById('local-video').parentElement.classList.remove('local-audio-only');
       }
     } catch (err) {
       showToast('Please allow camera access in your browser settings.', 'error');

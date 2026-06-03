@@ -92,7 +92,7 @@
     .view-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; }
     .room-footer { height: 80px; flex-shrink: 0; }
     
-    .pip-mode .video-grid { position: absolute; bottom: 20px; right: 20px; width: auto; height: auto; flex-direction: row; z-index: 10; padding: 0; gap: 16px;}
+    .pip-mode .video-grid { position: absolute; top: 80px; left: 20px; width: auto; height: auto; flex-direction: row; z-index: 10; padding: 0; gap: 16px; bottom: auto; right: auto; }
     .pip-mode .video-wrapper { height: 120px; aspect-ratio: 16/9; width: auto; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
     .pip-mode #remote-waiting-layer .material-symbols-outlined { font-size: 32px; line-height: 1; margin-bottom: 4px; }
     .pip-mode #remote-label { font-size: 12px; text-align: center; line-height: 1.2; padding: 0 4px; }
@@ -113,7 +113,8 @@
       z-index: 50;
     }
     .video-wrapper.remote-audio-only #remote-video,
-    .video-wrapper.remote-audio-only #remote-waiting-layer {
+    .video-wrapper.remote-audio-only #remote-waiting-layer,
+    .video-wrapper.remote-audio-only #remote-fullscreen-btn {
       display: none !important;
     }
     .video-wrapper.remote-audio-only #remote-overlay-container {
@@ -123,11 +124,35 @@
       margin: 0 !important;
     }
     
+    /* Local Audio-Only Capsule */
+    .video-wrapper.local-audio-only {
+      position: absolute !important;
+      bottom: 24px;
+      left: 24px;
+      width: auto !important;
+      height: auto !important;
+      flex: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      z-index: 50;
+    }
+    .video-wrapper.local-audio-only video {
+      display: none !important;
+    }
+    .video-wrapper.local-audio-only > div.absolute {
+      position: relative !important;
+      bottom: auto !important;
+      left: auto !important;
+      margin: 0 !important;
+    }
+    
     @media (max-width: 768px) { 
-      .pip-mode .video-grid { flex-direction: row; gap: 8px; right: 16px; bottom: 16px; } 
+      .pip-mode .video-grid { flex-direction: row; gap: 8px; top: 70px; left: 16px; bottom: auto; right: auto; } 
       .pip-mode .video-wrapper { height: 80px; } 
       .pip-mode .video-wrapper > div.absolute { bottom: 6px; left: 6px; padding: 2px 6px; }
       .video-wrapper.remote-audio-only { bottom: 16px; right: 16px; }
+      .video-wrapper.local-audio-only { bottom: 16px; left: 16px; }
     }
     
     /* Fix Plyr Video Size */
@@ -290,6 +315,10 @@
                 <button class="fit-option text-left px-4 py-3 hover:bg-white/5 text-sm transition-colors text-on-surface-variant" data-fit="crop">Entire Fit (Crop)</button>
                 <button class="fit-option text-left px-4 py-3 hover:bg-white/5 text-sm transition-colors text-on-surface-variant" data-fit="full-width">Full Width</button>
                 <button class="fit-option text-left px-4 py-3 hover:bg-white/5 text-sm transition-colors text-on-surface-variant" data-fit="full-height">Full Height</button>
+                <div class="h-px bg-white/10 my-1"></div>
+                <button id="player-rotate-btn" class="text-left px-4 py-3 hover:bg-white/5 text-sm transition-colors text-on-surface-variant flex justify-between items-center">
+                  Rotate Screen <span class="material-symbols-outlined text-sm">screen_rotation</span>
+                </button>
               </div>
             </div>
             <img id="video-placeholder" src="/img/videoplayerbg.webp" alt="Waiting for video" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 md:w-1/3 lg:w-1/4 max-w-xs md:max-w-sm object-contain z-0 opacity-80">
@@ -456,11 +485,22 @@
       
       // Mobile Rotation Logic
       const rotateBtn = document.getElementById('rotate-btn');
+      const playerRotateBtn = document.getElementById('player-rotate-btn');
       const roomContainer = document.querySelector('.room-container');
+      
+      const toggleRotation = () => {
+        roomContainer.classList.toggle('mobile-rotated');
+        if (fitMenu && !fitMenu.classList.contains('hidden')) {
+          fitMenu.classList.add('hidden');
+          fitMenu.classList.remove('flex');
+        }
+      };
+
       if (rotateBtn && roomContainer) {
-        rotateBtn.addEventListener('click', () => {
-          roomContainer.classList.toggle('mobile-rotated');
-        });
+        rotateBtn.addEventListener('click', toggleRotation);
+      }
+      if (playerRotateBtn && roomContainer) {
+        playerRotateBtn.addEventListener('click', toggleRotation);
       }
     });
   </script>

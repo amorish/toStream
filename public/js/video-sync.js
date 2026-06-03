@@ -6,7 +6,7 @@ class VideoSyncManager {
     
     // Initialize Plyr for YouTube and raw video support
     this.player = new Plyr(this.videoElement, {
-      youtube: { noCookie: false, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+      youtube: { noCookie: false, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1, controls: 0, disablekb: 1, playsinline: 1 }
     });
     
     if (this.player.elements.container) {
